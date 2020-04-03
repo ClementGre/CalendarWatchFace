@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">CalendarWatchFace</string>
+    <string name="message">Watch face tapped</string>
+    <string name="my_analog_name">Calendar by themsou</string>
+</resources>

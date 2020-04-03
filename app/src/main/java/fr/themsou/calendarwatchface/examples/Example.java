@@ -1,4 +1,4 @@
-package fr.themsou.calendarwatchface;
+package fr.themsou.calendarwatchface.examples;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -28,6 +28,8 @@ import java.lang.ref.WeakReference;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+
+import fr.themsou.calendarwatchface.R;
 
 /**
  * Analog watch face with a ticking second hand. In ambient mode, the second hand isn't
@@ -136,7 +138,7 @@ public class Example extends CanvasWatchFaceService {
         private void initializeBackground() {
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setColor(Color.BLACK);
-            mBackgroundBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.bg);
+            //mBackgroundBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.bg);
 
             /* Extracts colors from background image to improve watchface style. */
             Palette.from(mBackgroundBitmap).generate(new Palette.PaletteAsyncListener() {

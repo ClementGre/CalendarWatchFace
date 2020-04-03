@@ -1,4 +1,20 @@
-package fr.themsou.calendarwatchface;
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package fr.themsou.calendarwatchface.examples;
 
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
@@ -13,49 +29,41 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
-import android.util.Log;
 import android.view.SurfaceHolder;
 
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
+import fr.themsou.calendarwatchface.R;
+
 /**
- * Analog watch face with a ticking second hand. In ambient mode, the second hand isn't
- * shown. On devices with low-bit ambient mode, the hands are drawn without anti-aliasing in ambient
- * mode. The watch face is drawn with less contrast in mute mode.
- * <p>
- * Important Note: Because watch face apps do not have a default Activity in
- * their project, you will need to set your Configurations to
- * "Do not launch Activity" for both the Wear and/or Application modules. If you
- * are unsure how to do this, please review the "Run Starter project" section
- * in the Google Watch Face Code Lab:
- * https://codelabs.developers.google.com/codelabs/watchface/index.html#0
+ * Analog watch face with a ticking second hand. In ambient mode, the second hand isn't shown. On
+ * devices with low-bit ambient mode, the hands are drawn without anti-aliasing in ambient mode.
  */
-public class MyWatchFace extends CanvasWatchFaceService {
+public class MyWatchFaceService extends CanvasWatchFaceService {
 
-    // ADD connection :
-    // cd C:\\Users\Clement\AppData\Local\Android\Sdk\platform-tools
-    // adb tcpip 5555
-    // adb devices
-    // adb connect 192.168.192.5:5555
-
-    //Updates rate in milliseconds for interactive mode
+    /**
+     * Update rate in milliseconds for interactive mode. We update once a second to advance the
+     * second hand.
+     */
     private static final long INTERACTIVE_UPDATE_RATE_MS = TimeUnit.SECONDS.toMillis(1);
 
     @Override
     public Engine onCreateEngine() {
         return new Engine();
     }
+
     private class Engine extends CanvasWatchFaceService.Engine {
 
         /* Handler to update the time once a second in interactive mode. */
         @SuppressLint("HandlerLeak")
         private final Handler mUpdateTimeHandler = new Handler() {
-            @Override public void handleMessage(Message message) {
-                if(R.id.message_update == message.what){
+            @Override
+            public void handleMessage(Message message) {
+                if (R.id.message_update == message.what) {
                     invalidate();
-                    if(shouldTimerBeRunning()){
+                    if (shouldTimerBeRunning()) {
                         long timeMs = System.currentTimeMillis();
                         long delayMs = INTERACTIVE_UPDATE_RATE_MS
                                 - (timeMs % INTERACTIVE_UPDATE_RATE_MS);
@@ -94,15 +102,11 @@ public class MyWatchFace extends CanvasWatchFaceService {
         private float mCenterY;
         private float mScale = 1;
 
-        //////////////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////// CREATE - DESTROY //////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////////////////////
-
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
 
-            setWatchFaceStyle(new WatchFaceStyle.Builder(MyWatchFace.this).build());
+            setWatchFaceStyle(new WatchFaceStyle.Builder(MyWatchFaceService.this).build());
 
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setColor(Color.BLACK);
@@ -114,24 +118,13 @@ public class MyWatchFace extends CanvasWatchFaceService {
             mHandPaint.setStrokeCap(Paint.Cap.ROUND);
 
             mCalendar = Calendar.getInstance();
-
-            Log.d("MyWatchFace", "----------------------------------------");
-            Log.d("MyWatchFace", "      CALENDAR WATCH FACE CREATED");
-            Log.d("MyWatchFace", "----------------------------------------");
-
         }
+
         @Override
-        public void onDestroy(){
+        public void onDestroy() {
             mUpdateTimeHandler.removeMessages(R.id.message_update);
             super.onDestroy();
-            Log.d("MyWatchFace", "----------------------------------------");
-            Log.d("MyWatchFace", "     CALENDAR WATCH FACE DESTROYED");
-            Log.d("MyWatchFace", "----------------------------------------");
         }
-
-        //////////////////////////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////// BASE ////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////////////////////
 
         @Override
         public void onTimeTick() {
@@ -142,15 +135,9 @@ public class MyWatchFace extends CanvasWatchFaceService {
         @Override
         public void onAmbientModeChanged(boolean inAmbientMode) {
             super.onAmbientModeChanged(inAmbientMode);
-            if(mAmbient != inAmbientMode){
+            if (mAmbient != inAmbientMode) {
                 mAmbient = inAmbientMode;
                 invalidate();
-
-                if(inAmbientMode){
-                    Log.d("MyWatchFace", "---------- AMBIENT MODE ----------");
-                }else{
-                    Log.d("MyWatchFace", "----------- FULL MODE ------------");
-                }
             }
 
             /*
@@ -186,8 +173,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
             long now = System.currentTimeMillis();
             mCalendar.setTimeInMillis(now);
 
-            Log.d("MyWatchFace", "-> Draw...");
-
             // Draw the background.
             canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), mBackgroundPaint);
 
@@ -220,26 +205,23 @@ public class MyWatchFace extends CanvasWatchFaceService {
         public void onVisibilityChanged(boolean visible) {
             super.onVisibilityChanged(visible);
 
-            if(visible){
+            if (visible) {
                 registerReceiver();
+
                 // Update time zone in case it changed while we weren't visible.
                 mCalendar.setTimeZone(TimeZone.getDefault());
                 invalidate();
-            }else{
+            } else {
                 unregisterReceiver();
             }
 
             /*
-             * Whether the timer should be running depends on whether we're visible
-             * (as well as whether we're in ambient mode),
-             * so we may need to start or stop the timer.
-             */
+            * Whether the timer should be running depends on whether we're visible
+            * (as well as whether we're in ambient mode),
+            * so we may need to start or stop the timer.
+            */
             updateTimer();
         }
-
-        //////////////////////////////////////////////////////////////////////////////////////////
-        /////////////////////////////////////// METHODS //////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////////////////////
 
         private void registerReceiver() {
             if (mRegisteredTimeZoneReceiver) {
@@ -247,7 +229,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
             }
             mRegisteredTimeZoneReceiver = true;
             IntentFilter filter = new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED);
-            MyWatchFace.this.registerReceiver(mTimeZoneReceiver, filter);
+            MyWatchFaceService.this.registerReceiver(mTimeZoneReceiver, filter);
         }
 
         private void unregisterReceiver() {
@@ -255,7 +237,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 return;
             }
             mRegisteredTimeZoneReceiver = false;
-            MyWatchFace.this.unregisterReceiver(mTimeZoneReceiver);
+            MyWatchFaceService.this.unregisterReceiver(mTimeZoneReceiver);
         }
 
         private void updateTimer() {
