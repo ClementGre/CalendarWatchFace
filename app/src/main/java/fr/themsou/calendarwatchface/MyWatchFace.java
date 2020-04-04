@@ -9,6 +9,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.os.Handler;
 import android.os.Message;
 import android.support.wearable.watchface.CanvasWatchFaceService;
@@ -47,7 +48,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
     public Engine onCreateEngine() {
         return new Engine();
     }
-    private class Engine extends CanvasWatchFaceService.Engine {
+    class Engine extends CanvasWatchFaceService.Engine {
 
         /* Handler to update the time once a second in interactive mode. */
         @SuppressLint("HandlerLeak")
@@ -65,34 +66,31 @@ public class MyWatchFace extends CanvasWatchFaceService {
             }
         };
 
+        private boolean mRegisteredTimeZoneReceiver = false;
         private final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                mCalendar.setTimeZone(TimeZone.getDefault());
+                calendar.setTimeZone(TimeZone.getDefault());
                 invalidate();
             }
         };
 
-        private boolean mRegisteredTimeZoneReceiver = false;
 
-        private static final float STROKE_WIDTH = 3f;
+        static final float STROKE_WIDTH = 3f;
 
-        private Calendar mCalendar;
+        Calendar calendar;
+        boolean isAmbient;
 
-        private Paint mBackgroundPaint;
-        private Paint mHandPaint;
+        int displayWidth;
+        int displayHeight;
+        float displayCenterX;
+        float displayCenterY;
 
-        private boolean mAmbient;
+        Typeface FONT_DIN_BOLD;
+        Typeface FONT_DIN_LIGHT;
+        Typeface FONT_TEXTMEONE_REGULAR;
 
-        private float mHourHandLength;
-        private float mMinuteHandLength;
-        private float mSecondHandLength;
-
-        private int mWidth;
-        private int mHeight;
-        private float mCenterX;
-        private float mCenterY;
-        private float mScale = 1;
+        Designer designer = new Designer(this);
 
         //////////////////////////////////////////////////////////////////////////////////////////
         ////////////////////////////////// CREATE - DESTROY //////////////////////////////////////
@@ -103,17 +101,13 @@ public class MyWatchFace extends CanvasWatchFaceService {
             super.onCreate(holder);
 
             setWatchFaceStyle(new WatchFaceStyle.Builder(MyWatchFace.this).build());
+            calendar = Calendar.getInstance();
 
-            mBackgroundPaint = new Paint();
-            mBackgroundPaint.setColor(Color.BLACK);
+            FONT_DIN_BOLD = Typeface.createFromAsset(getAssets(),"fonts/din_bold.ttf");
+            FONT_DIN_LIGHT = Typeface.createFromAsset(getAssets(),"fonts/din_light.ttf");
+            FONT_TEXTMEONE_REGULAR = Typeface.createFromAsset(getAssets(),"fonts/textmeone_regular.ttf");
 
-            mHandPaint = new Paint();
-            mHandPaint.setColor(Color.WHITE);
-            mHandPaint.setStrokeWidth(STROKE_WIDTH);
-            mHandPaint.setAntiAlias(true);
-            mHandPaint.setStrokeCap(Paint.Cap.ROUND);
-
-            mCalendar = Calendar.getInstance();
+            designer.setupPaints();
 
             Log.d("MyWatchFace", "----------------------------------------");
             Log.d("MyWatchFace", "      CALENDAR WATCH FACE CREATED");
@@ -134,7 +128,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
         //////////////////////////////////////////////////////////////////////////////////////////
 
         @Override
-        public void onTimeTick() {
+        public void onTimeTick(){
             super.onTimeTick();
             invalidate();
         }
@@ -142,8 +136,15 @@ public class MyWatchFace extends CanvasWatchFaceService {
         @Override
         public void onAmbientModeChanged(boolean inAmbientMode) {
             super.onAmbientModeChanged(inAmbientMode);
-            if(mAmbient != inAmbientMode){
-                mAmbient = inAmbientMode;
+            if(isAmbient != inAmbientMode){
+                isAmbient = inAmbientMode;
+
+                if(inAmbientMode){
+                    designer.updatePaintsToAmbientMode();
+                }else{
+                    designer.updatePaintsToFullMode();
+                }
+
                 invalidate();
 
                 if(inAmbientMode){
@@ -163,57 +164,25 @@ public class MyWatchFace extends CanvasWatchFaceService {
         @Override
         public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
             super.onSurfaceChanged(holder, format, width, height);
-            mWidth = width;
-            mHeight = height;
+            displayWidth = width;
+            displayHeight = height;
             /*
              * Find the coordinates of the center point on the screen.
              * Ignore the window insets so that, on round watches
              * with a "chin", the watch face is centered on the entire screen,
              * not just the usable portion.
              */
-            mCenterX = mWidth / 2f;
-            mCenterY = mHeight / 2f;
-            /*
-             * Calculate the lengths of the watch hands and store them in member variables.
-             */
-            mHourHandLength = mCenterX - 80;
-            mMinuteHandLength = mCenterX - 40;
-            mSecondHandLength = mCenterX - 20;
+            displayCenterX = displayWidth / 2f;
+            displayCenterY = displayHeight / 2f;
         }
 
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
             long now = System.currentTimeMillis();
-            mCalendar.setTimeInMillis(now);
+            calendar.setTimeInMillis(now);
 
-            Log.d("MyWatchFace", "-> Draw...");
+            designer.draw(canvas);
 
-            // Draw the background.
-            canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), mBackgroundPaint);
-
-            /*
-             * These calculations reflect the rotation in degrees per unit of time, e.g.,
-             * 360 / 60 = 6 and 360 / 12 = 30.
-             */
-            final float secondsRotation = (mCalendar.get(Calendar.SECOND) + mCalendar.get(Calendar.MILLISECOND) / 1000f) * 6f;
-            final float minutesRotation = mCalendar.get(Calendar.MINUTE) * 6f;
-            final float hoursRotation = (mCalendar.get(Calendar.HOUR) * 30) + mCalendar.get(Calendar.MINUTE) / 2f;
-
-            // save the canvas state before we begin to rotate it
-            canvas.save();
-
-            canvas.rotate(hoursRotation, mCenterX, mCenterY);
-            canvas.drawLine(mCenterX, mCenterY, mCenterX, mCenterY - mHourHandLength, mHandPaint);
-
-            canvas.rotate(minutesRotation - hoursRotation, mCenterX, mCenterY);
-            canvas.drawLine(mCenterX, mCenterY, mCenterX, mCenterY - mMinuteHandLength, mHandPaint);
-
-            if(!mAmbient){
-                canvas.rotate(secondsRotation - minutesRotation, mCenterX, mCenterY);
-                canvas.drawLine(mCenterX, mCenterY, mCenterX, mCenterY - mSecondHandLength, mHandPaint);
-            }
-            // restore the canvas' original orientation.
-            canvas.restore();
         }
 
         @Override
@@ -223,7 +192,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
             if(visible){
                 registerReceiver();
                 // Update time zone in case it changed while we weren't visible.
-                mCalendar.setTimeZone(TimeZone.getDefault());
+                calendar.setTimeZone(TimeZone.getDefault());
                 invalidate();
             }else{
                 unregisterReceiver();
