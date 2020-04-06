@@ -5,12 +5,14 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.Log;
+
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Random;
 
 class Designer {
 
-    private static final String TAG = "MyWatchFace";
+    private static final String TAG = "CalendarWatchFace";
 
     private Paint paintTop;
     private Paint paintBottom;
@@ -24,7 +26,9 @@ class Designer {
     private Paint paintSeconds;
     private Paint paintDate;
 
-    private MyWatchFace.Engine engine;
+    private ArrayList<Event> events;
+
+    MyWatchFace.Engine engine;
 
     Designer(MyWatchFace.Engine engine){
         this.engine = engine;
@@ -92,8 +96,6 @@ class Designer {
         paintDate.setAntiAlias(true);
         paintDate.setShadowLayer(1, 1, 1, Color.WHITE);
 
-        CalendarReader.tryGetCalendars(engine.myWatchFace);
-
     }
 
     void updatePaintsToAmbientMode(){
@@ -116,40 +118,6 @@ class Designer {
 
     }
 
-    private void setupPaths(){
-
-        pathTicks = new Path();
-        pathTicks.setFillType(Path.FillType.WINDING);
-        pathSelectedTicks = new Path();
-        pathSelectedTicks.setFillType(Path.FillType.WINDING);
-        float tickRadius = engine.displayCenterX - 9;
-        boolean last = false;
-        for(int tickIndex = 0; tickIndex < 96; tickIndex++){
-            float tickRot = (float) (Math.PI * 2 / 96 * tickIndex);
-
-            float x = (float) Math.sin(tickRot) * tickRadius;
-            float y = (float) Math.cos(tickRot) * tickRadius;
-
-            boolean selected;
-            if(last){
-                selected = new Random().nextInt(4) != 1;
-            }else{
-                selected = new Random().nextInt(8) == 1;
-            }
-            last = selected;
-
-            int radius = (tickIndex % 4 == 0) ? 2 : 1;
-
-            if(selected){
-                pathSelectedTicks.addCircle(engine.displayCenterX + x, engine.displayCenterY + y, radius, Path.Direction.CW);
-            }else{
-                pathTicks.addCircle(engine.displayCenterX + x, engine.displayCenterY + y, radius, Path.Direction.CW);
-            }
-
-        }
-
-    }
-
     void draw(Canvas canvas){
 
 
@@ -166,13 +134,67 @@ class Designer {
             canvas.drawText(getShortDate(), engine.displayCenterX, engine.displayCenterY - 130, paintDate);
 
         }
-        if(pathTicks == null){
-            Log.d(TAG, "Setup paths");
-            setupPaths();
-        }
+        if(pathTicks == null) setupPaths();
+        if(events == null) updateCalendar();
+
 
         canvas.drawPath(pathTicks, paintTicks);
         canvas.drawPath(pathSelectedTicks, paintSelectedTicks);
+
+    }
+    void updateCalendar(){
+        Log.d(TAG, "updateCalendar");
+
+        events = CalendarReader.get24HEvents(engine.myWatchFace);
+
+
+
+    }
+
+    private void setupCalendarPath(){
+        Log.d(TAG, "setupCalendarPath");
+
+        for(Event event : events){
+
+            long begin = event.getSinceDayMinuteBegin(engine.calendar);
+            //if(begin > 24*60) continue; // évènement qui n'est pas compris dans la journée.
+
+
+            float tickRadius = engine.displayCenterX - 9;
+            for(int tickIndex = 0; tickIndex < 96; tickIndex++){
+                float tickRot = (float) (Math.PI * 2 / 96 * tickIndex);
+
+                float x = (float) Math.sin(tickRot) * tickRadius;
+                float y = (float) Math.cos(tickRot) * tickRadius;
+
+                int radius = (tickIndex % 4 == 0) ? 2 : 1;
+                pathTicks.addCircle(engine.displayCenterX + x, engine.displayCenterY + y, radius, Path.Direction.CW);
+
+            }
+        }
+
+    }
+
+    private void setupPaths(){
+        Log.d(TAG, "setupPaths");
+
+        pathSelectedTicks = new Path();
+        pathSelectedTicks.setFillType(Path.FillType.WINDING);
+
+        pathTicks = new Path();
+        pathTicks.setFillType(Path.FillType.WINDING);
+
+        float tickRadius = engine.displayCenterX - 9;
+        for(int tickIndex = 0; tickIndex < 96; tickIndex++){
+            float tickRot = (float) (Math.PI * 2 / 96 * tickIndex);
+
+            float x = (float) Math.sin(tickRot) * tickRadius;
+            float y = (float) Math.cos(tickRot) * tickRadius;
+
+            int radius = (tickIndex % 4 == 0) ? 2 : 1;
+            pathTicks.addCircle(engine.displayCenterX + x, engine.displayCenterY + y, radius, Path.Direction.CW);
+
+        }
 
     }
 

@@ -37,7 +37,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
     // adb devices
     // adb connect 192.168.192.5:5555
 
-    private static final String TAG = "MyWatchFace";
+    private static final String TAG = "CalendarWatchFace";
     private static final long INTERACTIVE_UPDATE_RATE_MS = TimeUnit.SECONDS.toMillis(1);
 
     @Override
@@ -72,12 +72,9 @@ public class MyWatchFace extends CanvasWatchFaceService {
             }
         };
 
-
-        static final float STROKE_WIDTH = 3f;
-
         Calendar calendar;
-        boolean isAmbient;
 
+        boolean isAmbient;
         int displayWidth;
         int displayHeight;
         float displayCenterX;
@@ -88,9 +85,8 @@ public class MyWatchFace extends CanvasWatchFaceService {
         Typeface FONT_TEXTMEONE_REGULAR;
 
         Designer designer = new Designer(this);
-
-
         MyWatchFace myWatchFace;
+
         Engine(MyWatchFace myWatchFace){
             this.myWatchFace = myWatchFace;
         }
