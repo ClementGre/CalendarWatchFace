@@ -6,9 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Handler;
@@ -37,17 +34,15 @@ import java.util.concurrent.TimeUnit;
 public class MyWatchFace extends CanvasWatchFaceService {
 
     // ADD connection :
-    // cd C:\\Users\Clement\AppData\Local\Android\Sdk\platform-tools
-    // adb tcpip 5555
     // adb devices
     // adb connect 192.168.192.5:5555
 
-    //Updates rate in milliseconds for interactive mode
+    private static final String TAG = "MyWatchFace";
     private static final long INTERACTIVE_UPDATE_RATE_MS = TimeUnit.SECONDS.toMillis(1);
 
     @Override
-    public Engine onCreateEngine() {
-        return new Engine();
+    public Engine onCreateEngine(){
+        return new Engine(this);
     }
 
     class Engine extends CanvasWatchFaceService.Engine {
@@ -94,6 +89,12 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
         Designer designer = new Designer(this);
 
+
+        MyWatchFace myWatchFace;
+        Engine(MyWatchFace myWatchFace){
+            this.myWatchFace = myWatchFace;
+        }
+
         //////////////////////////////////////////////////////////////////////////////////////////
         ////////////////////////////////// CREATE - DESTROY //////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -101,6 +102,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
+
 
             setWatchFaceStyle(new WatchFaceStyle.Builder(MyWatchFace.this).build());
             calendar = Calendar.getInstance();
@@ -111,18 +113,18 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
             designer.setupPaints();
 
-            Log.d("MyWatchFace", "----------------------------------------");
-            Log.d("MyWatchFace", "      CALENDAR WATCH FACE CREATED");
-            Log.d("MyWatchFace", "----------------------------------------");
+            Log.d(TAG, "----------------------------------------");
+            Log.d(TAG, "      CALENDAR WATCH FACE CREATED");
+            Log.d(TAG, "----------------------------------------");
 
         }
         @Override
         public void onDestroy(){
             mUpdateTimeHandler.removeMessages(R.id.message_update);
             super.onDestroy();
-            Log.d("MyWatchFace", "----------------------------------------");
-            Log.d("MyWatchFace", "     CALENDAR WATCH FACE DESTROYED");
-            Log.d("MyWatchFace", "----------------------------------------");
+            Log.d(TAG, "----------------------------------------");
+            Log.d(TAG, "     CALENDAR WATCH FACE DESTROYED");
+            Log.d(TAG, "----------------------------------------");
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -150,9 +152,9 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 invalidate();
 
                 if(inAmbientMode){
-                    Log.d("MyWatchFace", "---------- AMBIENT MODE ----------");
+                    Log.d(TAG, "---------- AMBIENT MODE ----------");
                 }else{
-                    Log.d("MyWatchFace", "----------- FULL MODE ------------");
+                    Log.d(TAG, "----------- FULL MODE ------------");
                 }
             }
 

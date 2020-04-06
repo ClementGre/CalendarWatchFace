@@ -5,11 +5,12 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.Log;
-
 import java.util.Calendar;
 import java.util.Random;
 
 class Designer {
+
+    private static final String TAG = "MyWatchFace";
 
     private Paint paintTop;
     private Paint paintBottom;
@@ -24,7 +25,8 @@ class Designer {
     private Paint paintDate;
 
     private MyWatchFace.Engine engine;
-    Designer(MyWatchFace.Engine engine) {
+
+    Designer(MyWatchFace.Engine engine){
         this.engine = engine;
     }
 
@@ -37,7 +39,7 @@ class Designer {
         // TICKS
 
         paintTicks = new Paint();
-        paintTicks.setColor(Color.rgb(150, 150 ,150));
+        paintTicks.setColor(Color.rgb(150, 150, 150));
         paintTicks.setStyle(Paint.Style.FILL);
 
         paintSelectedTicks = new Paint();
@@ -77,20 +79,23 @@ class Designer {
         // Enable ShadowLayer and AntiAliasing
 
         paintTicks.setAntiAlias(true);
-        paintTicks.setShadowLayer(4, 0, 0, paintTicks.getColor());
+        paintTicks.setShadowLayer(10, 0, 0, paintTicks.getColor());
 
         paintSelectedTicks.setAntiAlias(true);
-        paintSelectedTicks.setShadowLayer(4, 0, 0, paintSelectedTicks.getColor());
+        paintSelectedTicks.setShadowLayer(10, 0, 0, paintSelectedTicks.getColor());
 
         paintHour.setAntiAlias(true);
-        paintHour.setShadowLayer(4, 2, 2, Color.WHITE);
+        paintHour.setShadowLayer(1, 1, 1, Color.WHITE);
         paintSeconds.setAntiAlias(true);
-        paintSeconds.setShadowLayer(4, 2, 2, Color.WHITE);
+        paintSeconds.setShadowLayer(1, 1, 1, Color.WHITE);
 
         paintDate.setAntiAlias(true);
-        paintDate.setShadowLayer(4, 2, 2, Color.WHITE);
+        paintDate.setShadowLayer(1, 1, 1, Color.WHITE);
+
+        CalendarReader.tryGetCalendars(engine.myWatchFace);
 
     }
+
     void updatePaintsToAmbientMode(){
 
         // Change Colors
@@ -110,6 +115,7 @@ class Designer {
         paintDate.clearShadowLayer();
 
     }
+
     private void setupPaths(){
 
         pathTicks = new Path();
@@ -140,7 +146,7 @@ class Designer {
                 pathTicks.addCircle(engine.displayCenterX + x, engine.displayCenterY + y, radius, Path.Direction.CW);
             }
 
-    }
+        }
 
     }
 
@@ -150,21 +156,18 @@ class Designer {
         canvas.drawRect(0, 0, engine.displayWidth, engine.displayCenterY, paintTop);
         canvas.drawRect(0, engine.displayCenterY, engine.displayWidth, engine.displayHeight, paintBottom);
 
-        canvas.drawText(getTime(),  engine.displayCenterX, engine.displayCenterY-20, paintHour);
+        canvas.drawText(getTime(), engine.displayCenterX, engine.displayCenterY - 20, paintHour);
         if(!engine.isAmbient){
 
-            canvas.drawText(":" + getSeconds(),  engine.displayCenterX + 110, engine.displayCenterY-20, paintSeconds);
+            canvas.drawText(":" + getSeconds(), engine.displayCenterX + 110, engine.displayCenterY - 20, paintSeconds);
 
-            canvas.drawText(getFullDate(),  engine.displayCenterX, engine.displayCenterY-130, paintDate);
+            canvas.drawText(getFullDate(), engine.displayCenterX, engine.displayCenterY - 130, paintDate);
         }else{
-            canvas.drawText(getShortDate(),  engine.displayCenterX, engine.displayCenterY-130, paintDate);
+            canvas.drawText(getShortDate(), engine.displayCenterX, engine.displayCenterY - 130, paintDate);
 
         }
         if(pathTicks == null){
-            Log.d("MyWatchFace", "Setup paths (null)");
-            setupPaths();
-        }else if(pathTicks.isEmpty()){
-            Log.d("MyWatchFace", "Setup paths (empty)");
+            Log.d(TAG, "Setup paths");
             setupPaths();
         }
 
@@ -172,8 +175,6 @@ class Designer {
         canvas.drawPath(pathSelectedTicks, paintSelectedTicks);
 
     }
-
-
 
     private String getTime(){
         int hour = engine.calendar.get(Calendar.HOUR_OF_DAY);
