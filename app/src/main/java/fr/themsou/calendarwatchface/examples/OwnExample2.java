@@ -29,9 +29,6 @@ public class OwnExample2 extends CanvasWatchFaceService {
 
         private Calendar mCalendar;
 
-        private Typeface din_light;
-        private Typeface din_bold;
-
         private Paint mTimePaint;
         private Paint mDatePaint;
         private Paint mRectPaint;
@@ -46,8 +43,8 @@ public class OwnExample2 extends CanvasWatchFaceService {
 
             displayMetrics = getResources().getDisplayMetrics();
 
-            din_light = Typeface.createFromAsset(getAssets(), "font/din_light.ttf");
-            din_bold = Typeface.createFromAsset(getAssets(), "font/din_bold.ttf");
+            Typeface din_light = Typeface.createFromAsset(getAssets(), "fonts/din_light.ttf");
+            Typeface din_bold = Typeface.createFromAsset(getAssets(), "fonts/din_bold.ttf");
 
             setWatchFaceStyle(new WatchFaceStyle.Builder(OwnExample2.this)
                     .setAcceptsTapEvents(true)

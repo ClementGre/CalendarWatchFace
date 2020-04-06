@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Handler;
@@ -48,6 +49,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
     public Engine onCreateEngine() {
         return new Engine();
     }
+
     class Engine extends CanvasWatchFaceService.Engine {
 
         /* Handler to update the time once a second in interactive mode. */
@@ -182,7 +184,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
             calendar.setTimeInMillis(now);
 
             designer.draw(canvas);
-
         }
 
         @Override

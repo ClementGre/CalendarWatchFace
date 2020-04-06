@@ -30,4 +30,5 @@ dependencies {
     implementation 'com.google.android.gms:play-services-base:17.2.1'
     implementation 'androidx.palette:palette:1.0.0'
     compileOnly 'com.google.android.wearable:wearable:2.5.0'
+    implementation 'org.jetbrains:annotations-java5:15.0'
 }

@@ -3,22 +3,25 @@ package fr.themsou.calendarwatchface;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Typeface;
-
-import androidx.core.content.res.ResourcesCompat;
+import android.graphics.Path;
+import android.util.Log;
 
 import java.util.Calendar;
+import java.util.Random;
 
 class Designer {
 
-    private Paint paintClear;
+    private Paint paintTop;
+    private Paint paintBottom;
 
     private Paint paintTicks;
+    private Paint paintSelectedTicks;
+    private Path pathTicks;
+    private Path pathSelectedTicks;
 
     private Paint paintHour;
+    private Paint paintSeconds;
     private Paint paintDate;
-
-    private boolean isBaseDraw = false;
 
     private MyWatchFace.Engine engine;
     Designer(MyWatchFace.Engine engine) {
@@ -27,110 +30,154 @@ class Designer {
 
     void setupPaints(){
 
-        paintClear = new Paint();
-        paintClear.setColor(Color.BLACK);
+        paintTop = new Paint();
+        paintBottom = new Paint();
+
+
+        // TICKS
 
         paintTicks = new Paint();
-        paintTicks.setColor(Color.rgb(200, 200, 200));
-        paintTicks.setStrokeWidth(5);
-        paintTicks.setStyle(Paint.Style.FILL_AND_STROKE);
-        paintTicks.setShadowLayer(6, 0, 0, Color.BLACK);
+        paintTicks.setColor(Color.rgb(150, 150 ,150));
+        paintTicks.setStyle(Paint.Style.FILL);
+
+        paintSelectedTicks = new Paint();
+        paintSelectedTicks.setColor(Color.rgb(255, 141, 26));
+        paintSelectedTicks.setStyle(Paint.Style.FILL);
+
+        // TEXT
 
         paintHour = new Paint();
-        paintHour.setTextSize(130);
+        paintHour.setTextSize(140);
+        paintHour.setTextScaleX(0.7f);
         paintHour.setTypeface(engine.FONT_TEXTMEONE_REGULAR);
         paintHour.setColor(Color.WHITE);
         paintHour.setTextAlign(Paint.Align.CENTER);
 
+        paintSeconds = new Paint();
+        paintSeconds.setTextSize(50);
+        paintSeconds.setTypeface(engine.FONT_TEXTMEONE_REGULAR);
+        paintSeconds.setColor(Color.WHITE);
 
         paintDate = new Paint();
-        paintHour.setTextSize(25);
-        paintHour.setTypeface(engine.FONT_DIN_BOLD);
+        paintDate.setTextSize(25);
+        paintDate.setTypeface(engine.FONT_DIN_BOLD);
         paintDate.setColor(Color.WHITE);
         paintDate.setTextAlign(Paint.Align.CENTER);
-
 
         updatePaintsToFullMode();
     }
 
     void updatePaintsToFullMode(){
+
+        // Change Colors
+
+        paintTop.setColor(Color.BLACK);
+        paintBottom.setColor(Color.rgb(42, 123, 155));
+
         // Enable ShadowLayer and AntiAliasing
 
         paintTicks.setAntiAlias(true);
-        //paintTicks.setShadowLayer(6, 0, 0, Color.BLACK);
+        paintTicks.setShadowLayer(4, 0, 0, paintTicks.getColor());
+
+        paintSelectedTicks.setAntiAlias(true);
+        paintSelectedTicks.setShadowLayer(4, 0, 0, paintSelectedTicks.getColor());
 
         paintHour.setAntiAlias(true);
-        //paintHour.setShadowLayer(6, 0, 0, Color.BLACK);
+        paintHour.setShadowLayer(4, 2, 2, Color.WHITE);
+        paintSeconds.setAntiAlias(true);
+        paintSeconds.setShadowLayer(4, 2, 2, Color.WHITE);
 
         paintDate.setAntiAlias(true);
-        //paintDate.setShadowLayer(6, 0, 0, Color.BLACK);
+        paintDate.setShadowLayer(4, 2, 2, Color.WHITE);
 
     }
     void updatePaintsToAmbientMode(){
+
+        // Change Colors
+
+        paintTop.setColor(Color.BLACK);
+        paintBottom.setColor(Color.BLACK);
+
         // Disable ShadowLayer and AntiAliasing
 
-        //paintTicks.setAntiAlias(false);
         paintTicks.clearShadowLayer();
+        paintSelectedTicks.clearShadowLayer();
 
-        paintHour.setAntiAlias(false);
+        //paintHour.setAntiAlias(false);
         paintHour.clearShadowLayer();
 
-        paintDate.setAntiAlias(false);
+        //paintDate.setAntiAlias(false);
         paintDate.clearShadowLayer();
 
     }
+    private void setupPaths(){
 
-    void invalidateBase(){
-        isBaseDraw = false;
-    }
-    private void drawBase(Canvas canvas){
-
-        float tickRadius = engine.displayCenterX - 6;
+        pathTicks = new Path();
+        pathTicks.setFillType(Path.FillType.WINDING);
+        pathSelectedTicks = new Path();
+        pathSelectedTicks.setFillType(Path.FillType.WINDING);
+        float tickRadius = engine.displayCenterX - 9;
+        boolean last = false;
         for(int tickIndex = 0; tickIndex < 96; tickIndex++){
-            float tickRot = (float) (tickIndex * Math.PI * 2 / 96);
+            float tickRot = (float) (Math.PI * 2 / 96 * tickIndex);
 
             float x = (float) Math.sin(tickRot) * tickRadius;
-            float y = (float) -Math.cos(tickRot) * tickRadius;
+            float y = (float) Math.cos(tickRot) * tickRadius;
 
-            if(tickIndex % 4 == 0){
-                canvas.drawCircle(engine.displayCenterX + x,  engine.displayCenterY + y, 2, paintTicks);
+            boolean selected;
+            if(last){
+                selected = new Random().nextInt(4) != 1;
             }else{
-                canvas.drawCircle(engine.displayCenterX + x,  engine.displayCenterY + y, 1, paintTicks);
+                selected = new Random().nextInt(8) == 1;
             }
-        }
+            last = selected;
+
+            int radius = (tickIndex % 4 == 0) ? 2 : 1;
+
+            if(selected){
+                pathSelectedTicks.addCircle(engine.displayCenterX + x, engine.displayCenterY + y, radius, Path.Direction.CW);
+            }else{
+                pathTicks.addCircle(engine.displayCenterX + x, engine.displayCenterY + y, radius, Path.Direction.CW);
+            }
+
+    }
 
     }
 
     void draw(Canvas canvas){
 
-        if(!isBaseDraw){
-            paintClear.setColor(Color.BLACK);
-            canvas.drawRect(0, 0, engine.displayWidth, engine.displayHeight, paintClear);
-            drawBase(canvas);
-        }else{
-            paintClear.setColor(Color.GRAY);
-            canvas.drawRect(40, 40, engine.displayWidth-80, engine.displayHeight-80, paintClear);
-        }
 
+        canvas.drawRect(0, 0, engine.displayWidth, engine.displayCenterY, paintTop);
+        canvas.drawRect(0, engine.displayCenterY, engine.displayWidth, engine.displayHeight, paintBottom);
+
+        canvas.drawText(getTime(),  engine.displayCenterX, engine.displayCenterY-20, paintHour);
         if(!engine.isAmbient){
 
-            canvas.drawText(getTime()+":"+getSeconds(),  engine.displayCenterX, engine.displayCenterY-engine.displayCenterY/2, paintHour);
-            canvas.drawText(getFullDate(),  engine.displayCenterX, engine.displayCenterY, paintDate);
+            canvas.drawText(":" + getSeconds(),  engine.displayCenterX + 110, engine.displayCenterY-20, paintSeconds);
 
+            canvas.drawText(getFullDate(),  engine.displayCenterX, engine.displayCenterY-130, paintDate);
         }else{
-
-            canvas.drawText(getTime(),  engine.displayCenterX, engine.displayCenterY-engine.displayCenterY/2, paintHour);
-            canvas.drawText(getShortDate(),  engine.displayCenterX, engine.displayCenterY, paintDate);
+            canvas.drawText(getShortDate(),  engine.displayCenterX, engine.displayCenterY-130, paintDate);
 
         }
+        if(pathTicks == null){
+            Log.d("MyWatchFace", "Setup paths (null)");
+            setupPaths();
+        }else if(pathTicks.isEmpty()){
+            Log.d("MyWatchFace", "Setup paths (empty)");
+            setupPaths();
+        }
 
-
+        canvas.drawPath(pathTicks, paintTicks);
+        canvas.drawPath(pathSelectedTicks, paintSelectedTicks);
 
     }
 
+
+
     private String getTime(){
         int hour = engine.calendar.get(Calendar.HOUR_OF_DAY);
-        int minutes = engine.calendar.get(Calendar.HOUR_OF_DAY);
+        int minutes = engine.calendar.get(Calendar.MINUTE);
 
         String stringHour = ((hour < 10) ? "0" : "") + hour;
         String stringMinutes = ((minutes < 10) ? "0" : "") + minutes;
