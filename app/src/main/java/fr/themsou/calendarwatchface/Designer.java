@@ -107,38 +107,33 @@ class Designer {
         // EVENTS
 
         paintCurrentEvent = new Paint();
-        paintCurrentEvent.setTextSize(25);
+        paintCurrentEvent.setTextSize(27);
         paintCurrentEvent.setTypeface(engine.FONT_TEXTMEONE_REGULAR);
         paintCurrentEvent.setTextAlign(Paint.Align.CENTER);
         paintCurrentEvent.setColor(Color.LTGRAY);
         paintCurrentEvent.setAntiAlias(true);
-        //paintCurrentEvent.setShadowLayer(1, 1, 1, Color.WHITE);
 
         paintCurrentEventData = new Paint();
-        paintCurrentEventData.setTextSize(20);
+        paintCurrentEventData.setTextSize(22);
         paintCurrentEventData.setTextScaleX(0.9f);
         paintCurrentEventData.setTypeface(engine.FONT_TEXTMEONE_REGULAR);
         paintCurrentEventData.setTextAlign(Paint.Align.CENTER);
         paintCurrentEventData.setColor(Color.rgb(43, 152, 206));
         paintCurrentEventData.setAntiAlias(true);
-        //paintCurrentEventData.setShadowLayer(1, 1, 1, Color.WHITE);
 
         paintNextEvent = new Paint();
-        paintNextEvent.setTextSize(20);
+        paintNextEvent.setTextSize(22);
         paintNextEvent.setTypeface(engine.FONT_TEXTMEONE_REGULAR);
         paintNextEvent.setTextAlign(Paint.Align.CENTER);
         paintNextEvent.setColor(Color.rgb(170, 180, 0));
         paintNextEvent.setAntiAlias(true);
-        //paintNextEvent.setShadowLayer(1, 1, 1, Color.WHITE);
 
         paintNextEventData = new Paint();
-        paintNextEventData.setTextSize(20);
+        paintNextEventData.setTextSize(22);
         paintNextEventData.setTypeface(engine.FONT_TEXTMEONE_REGULAR);
         paintNextEventData.setTextAlign(Paint.Align.CENTER);
         paintNextEventData.setColor(Color.rgb(170, 180, 0));
         paintNextEventData.setAntiAlias(true);
-        //paintNextEventData.setShadowLayer(1, 1, 1, Color.WHITE);
-
 
         updatePaintsToFullMode();
 
@@ -157,13 +152,15 @@ class Designer {
 
         // Enable ShadowLayer and AntiAliasing
 
+        paintHour.setShadowLayer(1, 1, 1, paintHour.getColor());
+        paintSeconds.setShadowLayer(1, 1, 1, paintSeconds.getColor());
+        paintDate.setShadowLayer(1, 1, 1, paintDate.getColor());
 
-        //paintCurrentTick.setShadowLayer(3, 0, 0, paintCurrentTick.getColor());
-        //paintTicks.setShadowLayer(3, 0, 0, paintTicks.getColor());
-        //paintSelectedTicks.setShadowLayer(3, 0, 0, paintSelectedTicks.getColor());
+        paintCurrentEvent.setShadowLayer(1, 1, 1, paintCurrentEvent.getColor());
+        paintCurrentEventData.setShadowLayer(1, 1, 1, paintCurrentEventData.getColor());
+        paintNextEvent.setShadowLayer(1, 1, 1, paintNextEvent.getColor());
+        paintNextEventData.setShadowLayer(1, 1, 1, paintNextEventData.getColor());
 
-        //paintHour.setShadowLayer(1, 1, 1, Color.WHITE);
-        //paintDate.setShadowLayer(1, 1, 1, Color.WHITE);
 
         CalendarReader.resetPermissionData();
     }
@@ -172,12 +169,13 @@ class Designer {
 
         // Disable ShadowLayer and AntiAliasing
 
-        //paintTicks.clearShadowLayer();
-        //paintSelectedTicks.clearShadowLayer();
-        //paintCurrentTick.clearShadowLayer();
-
-        //paintHour.clearShadowLayer();
-        //paintDate.clearShadowLayer();
+        paintHour.clearShadowLayer();
+        paintDate.clearShadowLayer();
+        paintSeconds.clearShadowLayer();
+        paintCurrentEvent.clearShadowLayer();
+        paintCurrentEventData.clearShadowLayer();
+        paintNextEvent.clearShadowLayer();
+        paintNextEventData.clearShadowLayer();
 
     }
 
@@ -202,24 +200,24 @@ class Designer {
 
             Event next = CalendarReader.getNextEvent(events);
             if(next != null){
-                canvas.drawText("Prochain à " + getTime(next.getSinceDayMinuteBegin(engine.calendar)), engine.displayCenterX, engine.displayCenterY + 125, paintNextEventData);
+                canvas.drawText("Prochain à " + getTime(next.getSinceDayMinuteBegin(engine.calendar)), engine.displayCenterX, engine.displayCenterY + 120, paintNextEventData);
                 canvas.drawText(next.getName(), engine.displayCenterX, engine.displayCenterY + 150, paintNextEvent);
             }else{
-                canvas.drawText("Aucun évènement à suivre", engine.displayCenterX, engine.displayCenterY + 125, paintNextEventData);
+                canvas.drawText("Aucun à suivre", engine.displayCenterX, engine.displayCenterY + 120, paintNextEventData);
             }
             if(current != null){
-                canvas.drawText(current.getName(), engine.displayCenterX, engine.displayCenterY + 50, paintCurrentEvent);
+                canvas.drawText(current.getName(), engine.displayCenterX, engine.displayCenterY + 40, paintCurrentEvent);
                 canvas.drawText(getTime(current.getSinceDayMinuteBegin(engine.calendar)) + " > " + getTime(current.getSinceDayMinuteEnd(engine.calendar)) + " - " + current.getSinceNowMinutesEnd() + "mn restantes"
-                        , engine.displayCenterX, engine.displayCenterY + 75, paintCurrentEventData);
+                        , engine.displayCenterX, engine.displayCenterY + 70, paintCurrentEventData);
             }else{
-                canvas.drawText("Aucun évènement en cours", engine.displayCenterX, engine.displayCenterY + 50, paintCurrentEvent);
+                canvas.drawText("Aucun évènement", engine.displayCenterX, engine.displayCenterY + 40, paintCurrentEvent);
             }
 
         }else{
             canvas.drawText(getShortDate(), engine.displayCenterX, engine.displayCenterY - 130, paintDate);
 
             if(current != null){
-                canvas.drawText(current.getName(), engine.displayCenterX, engine.displayCenterY + 50, paintCurrentEvent);
+                canvas.drawText(current.getName(), engine.displayCenterX, engine.displayCenterY + 40, paintCurrentEvent);
                 canvas.drawText(getTime(current.getSinceDayMinuteBegin(engine.calendar)) + " > " + getTime(current.getSinceDayMinuteEnd(engine.calendar)) + " - " + current.getSinceNowMinutesEnd() + "mn restantes"
                         , engine.displayCenterX, engine.displayCenterY + 75, paintCurrentEventData);
             }

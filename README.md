@@ -4,7 +4,8 @@
 
 C'est une Watch Face (Cadran), qui a pour but d'afficher des informations sur le calendrier de l'utilisateur.
 
-*Prévisualisation de la montre*
+
+*Prévisualisation de la montre :*
 
 ![Preview](https://raw.githubusercontent.com/themsou/CalendarWatchFace/master/app/src/main/res/drawable/preview.png)
 
