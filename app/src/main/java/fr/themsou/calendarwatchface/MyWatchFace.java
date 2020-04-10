@@ -11,6 +11,7 @@ import android.graphics.Typeface;
 import android.os.Handler;
 import android.os.Message;
 import android.support.wearable.watchface.CanvasWatchFaceService;
+import android.support.wearable.watchface.WatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -100,7 +101,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
             super.onCreate(holder);
 
 
-            setWatchFaceStyle(new WatchFaceStyle.Builder(MyWatchFace.this).build());
+            setWatchFaceStyle(new WatchFaceStyle.Builder(MyWatchFace.this).setAcceptsTapEvents(true).build());
             calendar = Calendar.getInstance();
 
             FONT_DIN_BOLD = Typeface.createFromAsset(getAssets(),"fonts/din_bold.ttf");
@@ -203,6 +204,28 @@ public class MyWatchFace extends CanvasWatchFaceService {
              * so we may need to start or stop the timer.
              */
             updateTimer();
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////// TAP EVENTS ///////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        @Override
+        public void onTapCommand(@TapType int tapType, int x, int y, long eventTime){
+            switch (tapType){
+                case WatchFaceService.TAP_TYPE_TOUCH: // USER FIRST TOUCH SCREEN
+
+                break;
+                case WatchFaceService.TAP_TYPE_TOUCH_CANCEL: // DRAG : CANCEL
+
+                break;
+                case WatchFaceService.TAP_TYPE_TAP: // SINGLE TAP
+                    designer.singleTap(x, y);
+                break;
+                default:
+                    super.onTapCommand(tapType, x, y, eventTime);
+                break;
+            }
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////

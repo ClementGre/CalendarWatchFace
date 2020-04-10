@@ -2,6 +2,8 @@ package fr.themsou.calendarwatchface;
 
 import android.Manifest;
 import android.content.ContentResolver;
+import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Canvas;
@@ -19,6 +21,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 
 class Designer {
@@ -66,14 +69,17 @@ class Designer {
         paintTicks = new Paint();
         paintTicks.setColor(Color.rgb(150, 150, 150));
         paintTicks.setStyle(Paint.Style.FILL);
+        paintTicks.setAntiAlias(true);
 
         paintSelectedTicks = new Paint();
         paintSelectedTicks.setColor(Color.rgb(255, 141, 26));
         paintSelectedTicks.setStyle(Paint.Style.FILL);
+        paintSelectedTicks.setAntiAlias(true);
 
         paintCurrentTick = new Paint();
         paintCurrentTick.setColor(Color.rgb(42, 123, 155));
         paintCurrentTick.setStyle(Paint.Style.FILL);
+        paintCurrentTick.setAntiAlias(true);
 
         // TEXT
 
@@ -83,19 +89,20 @@ class Designer {
         paintHour.setTypeface(engine.FONT_TEXTMEONE_REGULAR);
         paintHour.setTextAlign(Paint.Align.CENTER);
         paintHour.setColor(Color.WHITE);
+        paintHour.setAntiAlias(true);
 
         paintSeconds = new Paint();
         paintSeconds.setTextSize(50);
         paintSeconds.setTypeface(engine.FONT_TEXTMEONE_REGULAR);
         paintSeconds.setColor(Color.WHITE);
         paintSeconds.setAntiAlias(true);
-        paintSeconds.setShadowLayer(1, 1, 1, Color.WHITE);
 
         paintDate = new Paint();
         paintDate.setTextSize(27);
         paintDate.setTypeface(engine.FONT_DIN_BOLD);
         paintDate.setTextAlign(Paint.Align.CENTER);
         paintDate.setColor(Color.WHITE);
+        paintDate.setAntiAlias(true);
 
         // EVENTS
 
@@ -148,26 +155,14 @@ class Designer {
 
     void updatePaintsToFullMode() {
 
-        // Change Colors
-
-        paintTop.setColor(Color.BLACK);
-        paintBottom.setColor(Color.BLACK);
-
         // Enable ShadowLayer and AntiAliasing
 
-        paintCurrentTick.setAntiAlias(true);
+
         //paintCurrentTick.setShadowLayer(3, 0, 0, paintCurrentTick.getColor());
-
-        paintTicks.setAntiAlias(true);
         //paintTicks.setShadowLayer(3, 0, 0, paintTicks.getColor());
-
-        paintSelectedTicks.setAntiAlias(true);
         //paintSelectedTicks.setShadowLayer(3, 0, 0, paintSelectedTicks.getColor());
 
-        paintHour.setAntiAlias(true);
         //paintHour.setShadowLayer(1, 1, 1, Color.WHITE);
-
-        paintDate.setAntiAlias(true);
         //paintDate.setShadowLayer(1, 1, 1, Color.WHITE);
 
         CalendarReader.resetPermissionData();
@@ -175,22 +170,14 @@ class Designer {
 
     void updatePaintsToAmbientMode() {
 
-        // Change Colors
-
-        paintTop.setColor(Color.BLACK);
-        paintBottom.setColor(Color.BLACK);
-
         // Disable ShadowLayer and AntiAliasing
 
         //paintTicks.clearShadowLayer();
         //paintSelectedTicks.clearShadowLayer();
         //paintCurrentTick.clearShadowLayer();
 
-        //paintHour.setAntiAlias(false);
-        paintHour.clearShadowLayer();
-
-        //paintDate.setAntiAlias(false);
-        paintDate.clearShadowLayer();
+        //paintHour.clearShadowLayer();
+        //paintDate.clearShadowLayer();
 
     }
 
@@ -205,6 +192,8 @@ class Designer {
         canvas.drawRect(0, 0, engine.displayWidth, engine.displayCenterY, paintTop);
         canvas.drawRect(0, engine.displayCenterY, engine.displayWidth, engine.displayHeight, paintBottom);
 
+        Event current = CalendarReader.getCurrentEvent(events);
+
         canvas.drawText(getTime(), engine.displayCenterX, engine.displayCenterY - 20, paintHour);
         if(!engine.isAmbient){
 
@@ -218,19 +207,22 @@ class Designer {
             }else{
                 canvas.drawText("Aucun évènement à suivre", engine.displayCenterX, engine.displayCenterY + 125, paintNextEventData);
             }
+            if(current != null){
+                canvas.drawText(current.getName(), engine.displayCenterX, engine.displayCenterY + 50, paintCurrentEvent);
+                canvas.drawText(getTime(current.getSinceDayMinuteBegin(engine.calendar)) + " > " + getTime(current.getSinceDayMinuteEnd(engine.calendar)) + " - " + current.getSinceNowMinutesEnd() + "mn restantes"
+                        , engine.displayCenterX, engine.displayCenterY + 75, paintCurrentEventData);
+            }else{
+                canvas.drawText("Aucun évènement en cours", engine.displayCenterX, engine.displayCenterY + 50, paintCurrentEvent);
+            }
 
         }else{
             canvas.drawText(getShortDate(), engine.displayCenterX, engine.displayCenterY - 130, paintDate);
 
-        }
-
-        Event current = CalendarReader.getCurrentEvent(events);
-        if(current != null){
-            canvas.drawText(current.getName(), engine.displayCenterX, engine.displayCenterY + 50, paintCurrentEvent);
-            canvas.drawText(getTime(current.getSinceDayMinuteBegin(engine.calendar)) + " > " + getTime(current.getSinceDayMinuteEnd(engine.calendar)) + " - " + current.getSinceNowMinutesEnd() + "mn restantes"
-                    , engine.displayCenterX, engine.displayCenterY + 75, paintCurrentEventData);
-        }else{
-            canvas.drawText("Aucun évènement en cours", engine.displayCenterX, engine.displayCenterY + 50, paintCurrentEvent);
+            if(current != null){
+                canvas.drawText(current.getName(), engine.displayCenterX, engine.displayCenterY + 50, paintCurrentEvent);
+                canvas.drawText(getTime(current.getSinceDayMinuteBegin(engine.calendar)) + " > " + getTime(current.getSinceDayMinuteEnd(engine.calendar)) + " - " + current.getSinceNowMinutesEnd() + "mn restantes"
+                        , engine.displayCenterX, engine.displayCenterY + 75, paintCurrentEventData);
+            }
         }
 
         // TICKS
@@ -238,6 +230,32 @@ class Designer {
         canvas.drawPath(pathTicks, paintTicks);
         canvas.drawPath(pathSelectedTicks, paintSelectedTicks);
         canvas.drawPath(pathCurrentTick, paintCurrentTick);
+    }
+
+    void singleTap(int x, int y){
+        if(y >= engine.displayCenterY){
+            Intent i;
+            try {
+                // { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10000000 pkg=com.google.android.wearable.app cmp=com.google.android.wearable.app/com.google.android.clockwork.home.calendar.AgendaActivity }
+                i = engine.myWatchFace.getPackageManager().getLaunchIntentForPackage("com.google.android.wearable.app");
+                if(i == null) throw new PackageManager.NameNotFoundException();
+                i.addCategory(Intent.CATEGORY_LAUNCHER);
+                engine.myWatchFace.startActivity(i);
+            }catch(PackageManager.NameNotFoundException e) {
+                // Appli non présente
+                Log.d(TAG, "Application calendrier introuvable Packages disponibles : ");
+
+                final PackageManager pm = engine.myWatchFace.getPackageManager();
+                List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+
+                for (ApplicationInfo packageInfo : packages) {
+                    Log.d(TAG, "Installed package :" + packageInfo.packageName);
+                    Log.d(TAG, "Source dir : " + packageInfo.sourceDir);
+                    Log.d(TAG, "Launch Activity :" + pm.getLaunchIntentForPackage(packageInfo.packageName));
+                    Log.d(TAG, " ");
+                }
+            }
+        }
     }
 
     private void updateCalendar() {
