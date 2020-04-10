@@ -10,42 +10,46 @@ public class Event {
     private long end;
     private boolean allDay;
 
-    public Event(String name, long begin, long end, boolean allDay) {
+    Event(String name, long begin, long end, boolean allDay) {
         this.name = name;
         this.begin = begin;
         this.end = end;
         this.allDay = allDay;
     }
 
-    public long getBegin(){
+    long getBegin(){
         return begin;
     }
-    public long getSinceNowMinutesBegin(){
+    long getSinceNowMinutesBegin(){
         return begin - System.currentTimeMillis()/1000/60;
     }
-    public long getSinceDayMinuteBegin(Calendar calendar){
+    long getSinceDayMinuteBegin(Calendar calendar){
         return calendar.get(Calendar.HOUR_OF_DAY)*60 + calendar.get(Calendar.MINUTE) + getSinceNowMinutesBegin();
     }
 
-    public long getEnd(){
+    long getEnd(){
         return end;
     }
-    public long getSinceNowMinutesEnd(){
+    long getSinceNowMinutesEnd(){
         return end - System.currentTimeMillis()/1000/60;
     }
-    public long getSinceDayMinuteEnd(Calendar calendar){
+    long getSinceDayMinuteEnd(Calendar calendar){
         return calendar.get(Calendar.HOUR_OF_DAY)*60 + calendar.get(Calendar.MINUTE) + getSinceNowMinutesEnd();
     }
 
-    public long getDuration(){
+    long getDuration(){
         return end - begin;
     }
 
-    public String getName() {
+    String getName() {
         return name;
     }
-    public boolean isAllDay() {
+    boolean isAllDay() {
         return allDay;
+    }
+
+    public static void getStringDate(){
+
     }
 
 }

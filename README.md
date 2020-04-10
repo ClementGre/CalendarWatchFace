@@ -1,8 +1,11 @@
 ## CalendarWatchFace
 
-**Cette application est destiné aux montres connectés sous Wear OS.**
+**Cette application android est destiné aux montres connectés sous Wear OS.**
 
-Elle est une Watch Face, qui a pour but d'afficher des informations sur le calendrier de l'utilisateur de la montre.
+C'est une Watch Face (Cadran), qui a pour but d'afficher des informations sur le calendrier de l'utilisateur.
+
+*Prévisualisation de la montre*
+![Preview](https://raw.githubusercontent.com/themsou/CalendarWatchFace/master/app/src/main/res/drawable/preview.png)
 
 ## Les APIs
 
