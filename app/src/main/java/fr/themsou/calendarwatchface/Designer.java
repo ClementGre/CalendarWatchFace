@@ -1,72 +1,54 @@
 package fr.themsou.calendarwatchface;
 
-import android.Manifest;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Path;
-import android.net.Uri;
-import android.provider.CalendarContract;
-import android.telecom.Call;
 import android.util.Log;
 
-import androidx.core.app.ActivityCompat;
-
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.Random;
 
 class Designer {
 
     private static final String TAG = "CalendarWatchFace";
 
-    private Paint paintTop;
-    private Paint paintBottom;
-
-    private Paint paintTicks;
-    private Paint paintSelectedTicks;
-    private Paint paintCurrentTick;
+    /*
+    private Paint paintTicks = new Paint();
+    private Paint paintSelectedTicks = new Paint();
+    private Paint paintCurrentTick = new Paint();
     private Path pathTicks;
     private Path pathSelectedTicks;
-    private Path pathCurrentTick;
+    private Path pathCurrentTick;*/
 
-    private Paint paintHour;
-    private Paint paintSeconds;
-    private Paint paintDate;
+    private final Paint paintBackground = new Paint();
 
-    private Paint paintCurrentEvent;
-    private Paint paintCurrentEventData;
-    private Paint paintNextEvent;
-    private Paint paintNextEventData;
+    private final Paint paintDate = new Paint();
+    private final Paint paintHour = new Paint();
+    private final Paint paintHourDetails = new Paint();
+
+    private final Paint paintEventNameBig = new Paint();
+    private final Paint paintEventName = new Paint();
+    private final Paint paintEventDetails = new Paint();
 
 
     private ArrayList<Event> events;
-
-    private MyWatchFace.Engine engine;
-
+    private final MyWatchFace.Engine engine;
     private DateEvents dateEvents;
-
-    Designer(MyWatchFace.Engine engine) {
+    public Designer(MyWatchFace.Engine engine){
         this.engine = engine;
     }
 
-    void setupPaints() {
+    void setupPaints(){
 
-        paintTop = new Paint();
-        paintBottom = new Paint();
-
+        paintBackground.setColor(Color.BLACK);
 
         // TICKS
 
-        paintTicks = new Paint();
+        /*paintTicks = new Paint();
         paintTicks.setColor(Color.rgb(150, 150, 150));
         paintTicks.setStyle(Paint.Style.FILL);
         paintTicks.setAntiAlias(true);
@@ -79,67 +61,53 @@ class Designer {
         paintCurrentTick = new Paint();
         paintCurrentTick.setColor(Color.rgb(42, 123, 155));
         paintCurrentTick.setStyle(Paint.Style.FILL);
-        paintCurrentTick.setAntiAlias(true);
+        paintCurrentTick.setAntiAlias(true);*/
 
-        // TEXT
+        // Hour / Date
 
-        paintHour = new Paint();
-        paintHour.setTextSize(140);
-        paintHour.setTextScaleX(0.7f);
-        paintHour.setTypeface(engine.FONT_TEXTMEONE_REGULAR);
-        paintHour.setTextAlign(Paint.Align.CENTER);
-        paintHour.setColor(Color.WHITE);
-        paintHour.setAntiAlias(true);
-
-        paintSeconds = new Paint();
-        paintSeconds.setTextSize(50);
-        paintSeconds.setTypeface(engine.FONT_TEXTMEONE_REGULAR);
-        paintSeconds.setColor(Color.WHITE);
-        paintSeconds.setAntiAlias(true);
-
-        paintDate = new Paint();
         paintDate.setTextSize(27);
-        paintDate.setTypeface(engine.FONT_DIN_BOLD);
+        paintDate.setTypeface(engine.FONT_RUBIK);
         paintDate.setTextAlign(Paint.Align.CENTER);
         paintDate.setColor(Color.WHITE);
-        paintDate.setAntiAlias(true);
+        paintDate.setStrokeWidth(1);
+
+        paintHour.setTextSize(165);
+        paintHour.setTextScaleX(0.7f);
+        paintHour.setTypeface(engine.FONT_RUBIK);
+        paintHour.setTextAlign(Paint.Align.CENTER);
+        paintHour.setColor(Color.WHITE);
+        paintHour.setStrokeWidth(1);
+
+        paintHourDetails.setTextSize(40);
+        paintHourDetails.setTypeface(engine.FONT_RUBIK);
+        paintHourDetails.setTextAlign(Paint.Align.CENTER);
+        paintHourDetails.setColor(Color.WHITE);
+        paintHourDetails.setStrokeWidth(1);
+
 
         // EVENTS
 
-        paintCurrentEvent = new Paint();
-        paintCurrentEvent.setTextSize(27);
-        paintCurrentEvent.setTypeface(engine.FONT_TEXTMEONE_REGULAR);
-        paintCurrentEvent.setTextAlign(Paint.Align.CENTER);
-        paintCurrentEvent.setColor(Color.LTGRAY);
-        paintCurrentEvent.setAntiAlias(true);
+        paintEventNameBig.setTextSize(27);
+        paintEventNameBig.setTypeface(engine.FONT_RUBIK);
+        paintEventNameBig.setTextAlign(Paint.Align.CENTER);
+        paintEventNameBig.setColor(Color.LTGRAY);
+        paintEventNameBig.setUnderlineText(true);
 
-        paintCurrentEventData = new Paint();
-        paintCurrentEventData.setTextSize(22);
-        paintCurrentEventData.setTextScaleX(0.9f);
-        paintCurrentEventData.setTypeface(engine.FONT_TEXTMEONE_REGULAR);
-        paintCurrentEventData.setTextAlign(Paint.Align.CENTER);
-        paintCurrentEventData.setColor(Color.rgb(43, 152, 206));
-        paintCurrentEventData.setAntiAlias(true);
+        paintEventName.setTextSize(22);
+        paintEventName.setTypeface(engine.FONT_RUBIK);
+        paintEventName.setTextAlign(Paint.Align.CENTER);
+        paintEventName.setColor(Color.rgb(170, 180, 0));
 
-        paintNextEvent = new Paint();
-        paintNextEvent.setTextSize(22);
-        paintNextEvent.setTypeface(engine.FONT_TEXTMEONE_REGULAR);
-        paintNextEvent.setTextAlign(Paint.Align.CENTER);
-        paintNextEvent.setColor(Color.rgb(170, 180, 0));
-        paintNextEvent.setAntiAlias(true);
-
-        paintNextEventData = new Paint();
-        paintNextEventData.setTextSize(22);
-        paintNextEventData.setTypeface(engine.FONT_TEXTMEONE_REGULAR);
-        paintNextEventData.setTextAlign(Paint.Align.CENTER);
-        paintNextEventData.setColor(Color.rgb(170, 180, 0));
-        paintNextEventData.setAntiAlias(true);
+        paintEventDetails.setTextSize(20);
+        paintEventDetails.setTypeface(engine.FONT_RUBIK);
+        paintEventDetails.setTextAlign(Paint.Align.CENTER);
+        paintEventDetails.setColor(Color.rgb(43, 152, 206));
 
         updatePaintsToFullMode();
 
         dateEvents = new DateEvents(new CallBack() {
             @Override public void call() { // MINUTES
-                setupCurrentTickPath();
+                /*setupCurrentTickPath();*/
             }
         }, new CallBack() {
             @Override public void call() { // HOUR
@@ -151,16 +119,26 @@ class Designer {
     void updatePaintsToFullMode() {
 
         // Enable ShadowLayer and AntiAliasing
+        paintDate.setAntiAlias(true);
+        paintHour.setAntiAlias(true);
+        paintHourDetails.setAntiAlias(true);
 
-        paintHour.setShadowLayer(1, 1, 1, paintHour.getColor());
-        paintSeconds.setShadowLayer(1, 1, 1, paintSeconds.getColor());
+        paintEventNameBig.setAntiAlias(true);
+        paintEventName.setAntiAlias(true);
+        paintEventDetails.setAntiAlias(true);
+
         paintDate.setShadowLayer(1, 1, 1, paintDate.getColor());
+        paintHour.setShadowLayer(1, 1, 1, paintHour.getColor());
+        paintHourDetails.setShadowLayer(1, 1, 1, paintHourDetails.getColor());
 
-        paintCurrentEvent.setShadowLayer(1, 1, 1, paintCurrentEvent.getColor());
-        paintCurrentEventData.setShadowLayer(1, 1, 1, paintCurrentEventData.getColor());
-        paintNextEvent.setShadowLayer(1, 1, 1, paintNextEvent.getColor());
-        paintNextEventData.setShadowLayer(1, 1, 1, paintNextEventData.getColor());
+        paintEventNameBig.setShadowLayer(1, 1, 1, paintEventNameBig.getColor());
+        paintEventName.setShadowLayer(1, 1, 1, paintEventName.getColor());
+        paintEventDetails.setShadowLayer(1, 1, 1, paintEventDetails.getColor());
 
+        // Switch to fill mode
+        paintDate.setStyle(Paint.Style.FILL);
+        paintHour.setStyle(Paint.Style.FILL);
+        paintHourDetails.setStyle(Paint.Style.FILL);
 
         CalendarReader.resetPermissionData();
     }
@@ -169,65 +147,107 @@ class Designer {
 
         // Disable ShadowLayer and AntiAliasing
 
-        paintHour.clearShadowLayer();
+        paintDate.setAntiAlias(false);
+        paintHour.setAntiAlias(false);
+        paintHourDetails.setAntiAlias(false);
+
+        paintEventNameBig.setAntiAlias(false);
+        paintEventName.setAntiAlias(false);
+        paintEventDetails.setAntiAlias(false);
+
         paintDate.clearShadowLayer();
-        paintSeconds.clearShadowLayer();
-        paintCurrentEvent.clearShadowLayer();
-        paintCurrentEventData.clearShadowLayer();
-        paintNextEvent.clearShadowLayer();
-        paintNextEventData.clearShadowLayer();
+        paintHour.clearShadowLayer();
+        paintHourDetails.clearShadowLayer();
+        paintEventNameBig.clearShadowLayer();
+        paintEventName.clearShadowLayer();
+        paintEventDetails.clearShadowLayer();
+
+        // Switch to stroke mode
+        paintDate.setStyle(Paint.Style.STROKE);
+        paintHour.setStyle(Paint.Style.STROKE);
+        paintHourDetails.setStyle(Paint.Style.STROKE);
+
 
     }
 
     void draw(Canvas canvas) {
 
-        if(pathTicks == null) setupPaths();
+        /*if(pathTicks == null) setupPaths();*/
         if(events == null) updateCalendar();
-        if(pathCurrentTick == null) setupCurrentTickPath();
+        /*if(pathCurrentTick == null) setupCurrentTickPath();*/
 
         dateEvents.tick(engine.calendar);
+        canvas.drawRect(0, 0, engine.displayWidth, engine.displayHeight, paintBackground);
 
-        canvas.drawRect(0, 0, engine.displayWidth, engine.displayCenterY, paintTop);
-        canvas.drawRect(0, engine.displayCenterY, engine.displayWidth, engine.displayHeight, paintBottom);
+        ArrayList<Event> currentEvents = CalendarReader.getCurrentEvents(events, 3);
+        ArrayList<Event> nextEvents = CalendarReader.getNextEvents(events, 3 - currentEvents.size());
+        ArrayList<Event> dayEvents = CalendarReader.getCurrentFullDayEvent(engine.calendar, events, 2);
 
-        Event current = CalendarReader.getCurrentEvent(events);
+        canvas.drawText(getTime(), engine.displayCenterX, engine.displayCenterY, paintHour);
 
-        canvas.drawText(getTime(), engine.displayCenterX, engine.displayCenterY - 20, paintHour);
         if(!engine.isAmbient){
 
-            canvas.drawText(":" + getSeconds(), engine.displayCenterX + 107, engine.displayCenterY - 20, paintSeconds);
-            canvas.drawText(getFullDate(), engine.displayCenterX, engine.displayCenterY - 130, paintDate);
+            canvas.drawText(getFullDate(), engine.displayCenterX, 103, paintDate);
+            canvas.drawText(":" + getSeconds(), engine.displayCenterX + 107, engine.displayCenterY, paintHourDetails);
 
-            Event next = CalendarReader.getNextEvent(events);
-            if(next != null){
-                canvas.drawText("Prochain à " + getTime(next.getSinceDayMinuteBegin(engine.calendar)), engine.displayCenterX, engine.displayCenterY + 120, paintNextEventData);
-                canvas.drawText(next.getName(), engine.displayCenterX, engine.displayCenterY + 150, paintNextEvent);
-            }else{
-                canvas.drawText("Aucun à suivre", engine.displayCenterX, engine.displayCenterY + 120, paintNextEventData);
+            int y = 41;
+            for(Event event : nextEvents){
+                canvas.drawText("- " + event.getName() + " -", engine.displayCenterX, y, paintEventName);
+                y += 26;
             }
-            if(current != null){
-                canvas.drawText(current.getName(), engine.displayCenterX, engine.displayCenterY + 40, paintCurrentEvent);
-                canvas.drawText(getTime(current.getSinceDayMinuteBegin(engine.calendar)) + " > " + getTime(current.getSinceDayMinuteEnd(engine.calendar)) + " - " + current.getSinceNowMinutesEnd() + "mn restantes"
-                        , engine.displayCenterX, engine.displayCenterY + 70, paintCurrentEventData);
-            }else{
-                canvas.drawText("Aucun évènement", engine.displayCenterX, engine.displayCenterY + 40, paintCurrentEvent);
+
+            y = 241;
+            for(Event event : currentEvents){
+                canvas.drawText("- " + event.getName() + " -", engine.displayCenterX, y, paintEventNameBig);
+                y += 22;
+                canvas.drawText(getTime(event.getBeginDateInDayMinutes(engine.calendar)) + " - " + getTime(event.getEndDateInDayMinutes(engine.calendar)) + " | " + getTime(event.getRemainingMinutesBeforeEnd(), false)
+                        , engine.displayCenterX, y, paintEventDetails);
+                y += 35;
+            }
+            for(Event event : nextEvents){
+
+                canvas.drawText("- " + event.getName() + " -", engine.displayCenterX, y, paintEventName);
+                y += 22;
+                canvas.drawText(getTime(event.getBeginDateInDayMinutes(engine.calendar)) + " - " + getTime(event.getEndDateInDayMinutes(engine.calendar)) + " | " + getTime(event.getRemainingMinutesBeforeEnd(), false)
+                        , engine.displayCenterX, y, paintEventDetails);
+                y += 28;
             }
 
         }else{
             canvas.drawText(getShortDate(), engine.displayCenterX, engine.displayCenterY - 130, paintDate);
+            // currentEvents.get(0).getBeginDateInDayMinutes(engine.calendar)
+            // canvas.drawText(, engine.displayCenterX + 107, engine.displayCenterY, paintHourDetails);
 
-            if(current != null){
-                canvas.drawText(current.getName(), engine.displayCenterX, engine.displayCenterY + 40, paintCurrentEvent);
-                canvas.drawText(getTime(current.getSinceDayMinuteBegin(engine.calendar)) + " > " + getTime(current.getSinceDayMinuteEnd(engine.calendar)) + " - " + current.getSinceNowMinutesEnd() + "mn restantes"
-                        , engine.displayCenterX, engine.displayCenterY + 75, paintCurrentEventData);
+            int y = 41;
+            for(Event event : nextEvents){
+                canvas.drawText("- " + event.getName() + " -", engine.displayCenterX, y, paintEventName);
+                y += 26;
             }
+
+            y = 241;
+            for(Event event : currentEvents){
+                canvas.drawText("- " + event.getName() + " -", engine.displayCenterX, y, paintEventNameBig);
+                y += 22;
+                canvas.drawText(getTime(event.getBeginDateInDayMinutes(engine.calendar)) + " - " + getTime(event.getEndDateInDayMinutes(engine.calendar)) + " | " + getTime(event.getRemainingMinutesBeforeEnd(), false)
+                        , engine.displayCenterX, y, paintEventDetails);
+                y += 35;
+            }
+            for(Event event : nextEvents){
+
+                canvas.drawText("- " + event.getName() + " -", engine.displayCenterX, y, paintEventName);
+                y += 22;
+                canvas.drawText(getTime(event.getBeginDateInDayMinutes(engine.calendar)) + " - " + getTime(event.getEndDateInDayMinutes(engine.calendar)) + " | " + getTime(event.getRemainingMinutesBeforeEnd(), false)
+                        , engine.displayCenterX, y, paintEventDetails);
+                y += 28;
+            }
+
         }
 
         // TICKS
 
-        canvas.drawPath(pathTicks, paintTicks);
+        /*canvas.drawPath(pathTicks, paintTicks);
         canvas.drawPath(pathSelectedTicks, paintSelectedTicks);
-        canvas.drawPath(pathCurrentTick, paintCurrentTick);
+        canvas.drawPath(pathCurrentTick, paintCurrentTick);*/
     }
 
     void singleTap(int x, int y){
@@ -237,19 +257,20 @@ class Designer {
                 // { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10000000 pkg=com.google.android.wearable.app cmp=com.google.android.wearable.app/com.google.android.clockwork.home.calendar.AgendaActivity }
                 i = engine.myWatchFace.getPackageManager().getLaunchIntentForPackage("com.google.android.wearable.app");
                 if(i == null) throw new PackageManager.NameNotFoundException();
+
                 i.addCategory(Intent.CATEGORY_LAUNCHER);
                 engine.myWatchFace.startActivity(i);
             }catch(PackageManager.NameNotFoundException e) {
                 // Appli non présente
-                Log.d(TAG, "Application calendrier introuvable Packages disponibles : ");
+                Log.d(TAG, "Application calendrier introuvable. Packages disponibles : ");
 
                 final PackageManager pm = engine.myWatchFace.getPackageManager();
                 List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
 
-                for (ApplicationInfo packageInfo : packages) {
-                    Log.d(TAG, "Installed package :" + packageInfo.packageName);
-                    Log.d(TAG, "Source dir : " + packageInfo.sourceDir);
-                    Log.d(TAG, "Launch Activity :" + pm.getLaunchIntentForPackage(packageInfo.packageName));
+                for(ApplicationInfo packageInfo : packages) {
+                    Log.d(TAG, "Installed package: " + packageInfo.packageName);
+                    Log.d(TAG, "Source dir: " + packageInfo.sourceDir);
+                    Log.d(TAG, "Start Activity: " + pm.getLaunchIntentForPackage(packageInfo.packageName));
                     Log.d(TAG, " ");
                 }
             }
@@ -261,12 +282,12 @@ class Designer {
 
         if(CalendarReader.checkPermission(engine)){
             events = CalendarReader.get24HEvents(engine.myWatchFace, engine.calendar);
-            setupSelectedTicksPath();
+            /*setupSelectedTicksPath();*/
         }
 
     }
 
-    private void setupCurrentTickPath(){
+    /*private void setupCurrentTickPath(){
 
         pathCurrentTick = new Path();
         pathCurrentTick.setFillType(Path.FillType.WINDING);
@@ -280,9 +301,9 @@ class Designer {
 
         pathCurrentTick.addCircle(engine.displayCenterX + x, engine.displayCenterY + y, 4, Path.Direction.CW);
 
-    }
+    }*/
 
-    private void setupSelectedTicksPath(){
+    /*private void setupSelectedTicksPath(){
         Log.d(TAG, "setupSelectedTicksPath");
 
         pathSelectedTicks = new Path();
@@ -314,9 +335,9 @@ class Designer {
 
             }
         }
-    }
+    }*/
 
-    private void setupPaths(){
+    /*private void setupPaths(){
         Log.d(TAG, "setupPaths");
 
         pathSelectedTicks = new Path();
@@ -337,13 +358,16 @@ class Designer {
 
         }
 
-    }
+    }*/
 
     private String getTime(long mn){
+        return getTime(mn, true);
+    }
+    private String getTime(long mn, boolean hourZero){
         int hour = (int) (mn) / 60;
         int minutes = (int) (mn) % 60;
 
-        String stringHour = ((hour < 10) ? "0" : "") + hour;
+        String stringHour = ((hour < 10 && hourZero) ? "0" : "") + hour;
         String stringMinutes = ((minutes < 10) ? "0" : "") + minutes;
 
         return stringHour + ":" + stringMinutes;
@@ -361,28 +385,23 @@ class Designer {
     private String getSeconds(){
 
         int seconds = engine.calendar.get(Calendar.SECOND);
-
         return ((seconds < 10) ? "0" : "") + seconds;
 
     }
-    private String getShortDate(){
 
+    private String getShortDate(){
         int dayMonth = engine.calendar.get(Calendar.DAY_OF_MONTH);
         int month = engine.calendar.get(Calendar.MONTH);
-
-        String stringMonth = ((month < 10) ? "0" : "") + month;
+        String stringMonth = ((month < 10) ? "0" : "") + (month+1);
 
         return getWeakDay() + " " + dayMonth + "/" + stringMonth;
     }
     private String getFullDate(){
-
         int dayMonth = engine.calendar.get(Calendar.DAY_OF_MONTH);
-
         return getWeakDay() + " " + dayMonth + " " + getMonthName();
 
     }
     private String getWeakDay(){
-
         switch(engine.calendar.get(Calendar.DAY_OF_WEEK)){
             case 2:
                 return "Lun";
@@ -433,36 +452,6 @@ class Designer {
                 return "-----";
         }
     }
-
-    /*void drawHands(Canvas canvas){
-
-        // Draw the background.
-        canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), mBackgroundPaint);
-
-        //These calculations reflect the rotation in degrees per unit of time, e.g., 360 / 60 = 6 and 360 / 12 = 30.
-
-        final float secondsRotation = (engine.calendar.get(Calendar.SECOND) + engine.calendar.get(Calendar.MILLISECOND) / 1000f) * 6f;
-        final float minutesRotation = engine.calendar.get(Calendar.MINUTE) * 6f;
-        final float hoursRotation = (engine.calendar.get(Calendar.HOUR) * 30) + (engine.calendar.get(Calendar.MINUTE) / 2f);
-
-        // save the canvas state before we begin to rotate it
-        canvas.save();
-
-        canvas.rotate(hoursRotation, engine.displayCenterX, engine.displayCenterY);
-        canvas.drawLine(engine.displayCenterX, engine.displayCenterY, engine.displayCenterX, engine.displayCenterY - 100, mHandPaint);
-
-        canvas.rotate(minutesRotation - hoursRotation, engine.displayCenterX, engine.displayCenterY);
-        canvas.drawLine(engine.displayCenterX, engine.displayCenterY, engine.displayCenterX, engine.displayCenterY - 150, mHandPaint);
-
-        if(!engine.isAmbient){
-            canvas.rotate(secondsRotation - minutesRotation, engine.displayCenterX, engine.displayCenterY);
-            canvas.drawLine(engine.displayCenterX, engine.displayCenterY, engine.displayCenterX, engine.displayCenterY - 180, mHandPaint);
-        }
-        // restore the canvas' original orientation.
-        canvas.restore();
-
-
-    }*/
 
 
 }

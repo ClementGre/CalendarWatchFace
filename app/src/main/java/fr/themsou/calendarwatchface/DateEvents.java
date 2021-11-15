@@ -6,8 +6,8 @@ class DateEvents{
 
     private boolean hasCalledHour = false;
 
-    private CallBack minute;
-    private CallBack hour;
+    private final CallBack minute;
+    private final CallBack hour;
 
     DateEvents(CallBack minute, CallBack hour) {
         this.minute = minute;

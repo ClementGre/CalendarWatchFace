@@ -72,37 +72,59 @@ class CalendarReader {
         }
         cursor.close();
 
-        events.sort(new Comparator<Event>() {
-            @Override public int compare(Event o1, Event o2) {
-                return Long.compare(o1.getBegin(), o2.getBegin());
-            }
-        });
+        events.sort(Comparator.comparingLong(Event::getBegin));
 
         return events;
     }
 
-    public static Event getCurrentEvent(ArrayList<Event> events){
+    public static ArrayList<Event> getCurrentEvents(ArrayList<Event> events, int max){
 
         long now = System.currentTimeMillis()/1000/60;
+        ArrayList<Event> eventsFiltered = new ArrayList<>();
 
         for(Event event : events){
-            if(event.getBegin() <= now && event.getEnd() > now){
-                return event;
+            if(!event.isAllDay() && event.getBegin() <= now && event.getEnd() > now){
+                if(eventsFiltered.size() < max){
+                    eventsFiltered.add(event);
+                    if(eventsFiltered.size() == max) break;
+                }else break;
             }
         }
-        return null;
+        return eventsFiltered;
 
     }
-    public static Event getNextEvent(ArrayList<Event> events){
+
+    public static ArrayList<Event> getNextEvents(ArrayList<Event> events, int count){
 
         long now = System.currentTimeMillis()/1000/60;
+        ArrayList<Event> eventsFiltered = new ArrayList<>();
 
         for(Event event : events){
-            if(event.getBegin() > now){
-                return event;
+            if(!event.isAllDay() && event.getBegin() > now && event.getRemainingMinutesBeforeBegin() < 60*12){
+                if(eventsFiltered.size() < count){
+                    eventsFiltered.add(event);
+                    if(eventsFiltered.size() == count) break;
+                }else break;
             }
         }
-        return null;
+        return eventsFiltered;
+
+    }
+    public static ArrayList<Event> getCurrentFullDayEvent(Calendar calendar, ArrayList<Event> events, int count){
+
+        long now = System.currentTimeMillis()/1000/60;
+        ArrayList<Event> eventsFiltered = new ArrayList<>();
+
+        for(Event event : events){
+            if(event.isAllDay() && event.getBegin() > now && event.isToday(calendar)){
+                if(eventsFiltered.size() < count){
+                    eventsFiltered.add(event);
+                    if(eventsFiltered.size() == count) break;
+                }else break;
+
+            }
+        }
+        return eventsFiltered;
 
     }
 }

@@ -56,8 +56,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
                     invalidate();
                     if(shouldTimerBeRunning()){
                         long timeMs = System.currentTimeMillis();
-                        long delayMs = INTERACTIVE_UPDATE_RATE_MS
-                                - (timeMs % INTERACTIVE_UPDATE_RATE_MS);
+                        long delayMs = INTERACTIVE_UPDATE_RATE_MS - (timeMs % INTERACTIVE_UPDATE_RATE_MS);
                         mUpdateTimeHandler.sendEmptyMessageDelayed(R.id.message_update, delayMs);
                     }
                 }
@@ -73,22 +72,20 @@ public class MyWatchFace extends CanvasWatchFaceService {
             }
         };
 
-        Calendar calendar;
+        public Calendar calendar;
 
-        boolean isAmbient;
-        int displayWidth;
-        int displayHeight;
-        float displayCenterX;
-        float displayCenterY;
+        public boolean isAmbient;
+        public int displayWidth;
+        public int displayHeight;
+        public float displayCenterX;
+        public float displayCenterY;
 
-        Typeface FONT_DIN_BOLD;
-        Typeface FONT_DIN_LIGHT;
-        Typeface FONT_TEXTMEONE_REGULAR;
+        public Typeface FONT_RUBIK;
 
-        Designer designer = new Designer(this);
-        MyWatchFace myWatchFace;
+        public Designer designer = new Designer(this);
 
-        Engine(MyWatchFace myWatchFace){
+        public final MyWatchFace myWatchFace;
+        public Engine(MyWatchFace myWatchFace){
             this.myWatchFace = myWatchFace;
         }
 
@@ -102,19 +99,16 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
 
             setWatchFaceStyle(new WatchFaceStyle.Builder(MyWatchFace.this).setAcceptsTapEvents(true).build());
+
+            FONT_RUBIK = Typeface.createFromAsset(getAssets(),"fonts/rubik-regular.ttf");
             calendar = Calendar.getInstance();
-
-            FONT_DIN_BOLD = Typeface.createFromAsset(getAssets(),"fonts/din_bold.ttf");
-            FONT_DIN_LIGHT = Typeface.createFromAsset(getAssets(),"fonts/din_light.ttf");
-            FONT_TEXTMEONE_REGULAR = Typeface.createFromAsset(getAssets(),"fonts/textmeone_regular.ttf");
-
             designer.setupPaints();
 
             Log.d(TAG, "----------------------------------------");
             Log.d(TAG, "      CALENDAR WATCH FACE CREATED");
             Log.d(TAG, "----------------------------------------");
-
         }
+
         @Override
         public void onDestroy(){
             mUpdateTimeHandler.removeMessages(R.id.message_update);
