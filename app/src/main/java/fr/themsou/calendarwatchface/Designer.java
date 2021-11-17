@@ -43,7 +43,6 @@ class Designer {
     }
 
     void setupPaints(){
-
         paintBackground.setColor(Color.BLACK);
 
         // TICKS
@@ -71,7 +70,7 @@ class Designer {
         paintDate.setColor(Color.WHITE);
         paintDate.setStrokeWidth(1);
 
-        paintHour.setTextSize(165);
+        paintHour.setTextSize(115);
         paintHour.setTextScaleX(0.7f);
         paintHour.setTypeface(engine.FONT_RUBIK);
         paintHour.setTextAlign(Paint.Align.CENTER);
@@ -90,18 +89,18 @@ class Designer {
         paintEventNameBig.setTextSize(27);
         paintEventNameBig.setTypeface(engine.FONT_RUBIK);
         paintEventNameBig.setTextAlign(Paint.Align.CENTER);
-        paintEventNameBig.setColor(Color.LTGRAY);
+        paintEventNameBig.setColor(Color.rgb(43, 152, 206));
         paintEventNameBig.setUnderlineText(true);
 
         paintEventName.setTextSize(22);
         paintEventName.setTypeface(engine.FONT_RUBIK);
         paintEventName.setTextAlign(Paint.Align.CENTER);
-        paintEventName.setColor(Color.rgb(170, 180, 0));
+        paintEventName.setColor(Color.rgb(43, 152, 206));
 
         paintEventDetails.setTextSize(20);
         paintEventDetails.setTypeface(engine.FONT_RUBIK);
         paintEventDetails.setTextAlign(Paint.Align.CENTER);
-        paintEventDetails.setColor(Color.rgb(43, 152, 206));
+        paintEventDetails.setColor(Color.rgb(173, 173, 173));
 
         updatePaintsToFullMode();
 
@@ -139,6 +138,7 @@ class Designer {
         paintDate.setStyle(Paint.Style.FILL);
         paintHour.setStyle(Paint.Style.FILL);
         paintHourDetails.setStyle(Paint.Style.FILL);
+        paintHourDetails.setColor(Color.WHITE);
 
         CalendarReader.resetPermissionData();
     }
@@ -166,6 +166,7 @@ class Designer {
         paintDate.setStyle(Paint.Style.STROKE);
         paintHour.setStyle(Paint.Style.STROKE);
         paintHourDetails.setStyle(Paint.Style.STROKE);
+        paintHourDetails.setColor(Color.rgb(43, 152, 206));
 
 
     }
@@ -188,16 +189,17 @@ class Designer {
         if(!engine.isAmbient){
 
             canvas.drawText(getFullDate(), engine.displayCenterX, 103, paintDate);
-            canvas.drawText(":" + getSeconds(), engine.displayCenterX + 107, engine.displayCenterY, paintHourDetails);
+            canvas.drawText(":" + getSeconds(), engine.displayCenterX + 156, engine.displayCenterY, paintHourDetails);
 
             int y = 41;
-            for(Event event : nextEvents){
+            for(Event event : dayEvents){
                 canvas.drawText("- " + event.getName() + " -", engine.displayCenterX, y, paintEventName);
                 y += 26;
             }
 
             y = 241;
             for(Event event : currentEvents){
+
                 canvas.drawText("- " + event.getName() + " -", engine.displayCenterX, y, paintEventNameBig);
                 y += 22;
                 canvas.drawText(getTime(event.getBeginDateInDayMinutes(engine.calendar)) + " - " + getTime(event.getEndDateInDayMinutes(engine.calendar)) + " | " + getTime(event.getRemainingMinutesBeforeEnd(), false)
@@ -208,24 +210,24 @@ class Designer {
 
                 canvas.drawText("- " + event.getName() + " -", engine.displayCenterX, y, paintEventName);
                 y += 22;
-                canvas.drawText(getTime(event.getBeginDateInDayMinutes(engine.calendar)) + " - " + getTime(event.getEndDateInDayMinutes(engine.calendar)) + " | " + getTime(event.getRemainingMinutesBeforeEnd(), false)
+                canvas.drawText(getTime(event.getBeginDateInDayMinutes(engine.calendar)) + " - " + getTime(event.getBeginDateInDayMinutes(engine.calendar)) + " | " + getTime(event.getRemainingMinutesBeforeEnd(), false)
                         , engine.displayCenterX, y, paintEventDetails);
                 y += 28;
             }
 
         }else{
-            canvas.drawText(getShortDate(), engine.displayCenterX, engine.displayCenterY - 130, paintDate);
-            // currentEvents.get(0).getBeginDateInDayMinutes(engine.calendar)
-            // canvas.drawText(, engine.displayCenterX + 107, engine.displayCenterY, paintHourDetails);
+            canvas.drawText(getShortDate(), engine.displayCenterX, 103, paintDate);
 
             int y = 41;
-            for(Event event : nextEvents){
+            for(Event event : dayEvents){
                 canvas.drawText("- " + event.getName() + " -", engine.displayCenterX, y, paintEventName);
                 y += 26;
             }
 
             y = 241;
             for(Event event : currentEvents){
+                if(y == 241) canvas.drawText(getTime(event.getRemainingMinutesBeforeEnd(), false), engine.displayCenterX + 156, engine.displayCenterY, paintHourDetails);
+
                 canvas.drawText("- " + event.getName() + " -", engine.displayCenterX, y, paintEventNameBig);
                 y += 22;
                 canvas.drawText(getTime(event.getBeginDateInDayMinutes(engine.calendar)) + " - " + getTime(event.getEndDateInDayMinutes(engine.calendar)) + " | " + getTime(event.getRemainingMinutesBeforeEnd(), false)
@@ -233,10 +235,11 @@ class Designer {
                 y += 35;
             }
             for(Event event : nextEvents){
+                if(y == 241) canvas.drawText(getTime(event.getRemainingMinutesBeforeBegin(), false), engine.displayCenterX + 156, engine.displayCenterY, paintHourDetails);
 
                 canvas.drawText("- " + event.getName() + " -", engine.displayCenterX, y, paintEventName);
                 y += 22;
-                canvas.drawText(getTime(event.getBeginDateInDayMinutes(engine.calendar)) + " - " + getTime(event.getEndDateInDayMinutes(engine.calendar)) + " | " + getTime(event.getRemainingMinutesBeforeEnd(), false)
+                canvas.drawText(getTime(event.getBeginDateInDayMinutes(engine.calendar)) + " - " + getTime(event.getBeginDateInDayMinutes(engine.calendar)) + " | " + getTime(event.getRemainingMinutesBeforeEnd(), false)
                         , engine.displayCenterX, y, paintEventDetails);
                 y += 28;
             }

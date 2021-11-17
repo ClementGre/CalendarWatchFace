@@ -16,6 +16,8 @@ import android.support.wearable.watchface.WatchFaceStyle;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
+import androidx.core.content.res.ResourcesCompat;
+
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
@@ -96,11 +98,13 @@ public class MyWatchFace extends CanvasWatchFaceService {
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
-
+            Log.d(TAG, "----------------------------------------");
+            Log.d(TAG, "    CREATING CALENDAR WATCH FACE...");
+            Log.d(TAG, "----------------------------------------");
 
             setWatchFaceStyle(new WatchFaceStyle.Builder(MyWatchFace.this).setAcceptsTapEvents(true).build());
 
-            FONT_RUBIK = Typeface.createFromAsset(getAssets(),"fonts/rubik-regular.ttf");
+            FONT_RUBIK = ResourcesCompat.getFont(myWatchFace, R.font.rubik_regular);
             calendar = Calendar.getInstance();
             designer.setupPaints();
 
