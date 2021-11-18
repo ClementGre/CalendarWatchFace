@@ -24,7 +24,6 @@ public class Event {
         return end;
     }
 
-
     public long getRemainingMinutesBeforeBegin(){
         return begin - System.currentTimeMillis()/1000/60;
     }
@@ -36,10 +35,6 @@ public class Event {
     }
     public long getEndDateInDayMinutes(Calendar calendar){
         return getDateInDayMinutes(calendar) + getRemainingMinutesBeforeEnd();
-    }
-
-    private long getDateInDayMinutes(Calendar calendar){
-        return calendar.get(Calendar.HOUR_OF_DAY)*60 + calendar.get(Calendar.MINUTE);
     }
 
 
@@ -56,10 +51,19 @@ public class Event {
 
     }
 
-    public boolean isToday(Calendar calendar){
-        long minBeforeBegin = getRemainingMinutesBeforeBegin();
-        long minBeforeDayEnd = 60*24 - getDateInDayMinutes(calendar);
+    public boolean shouldBeShown(Calendar calendar){
 
-        return  minBeforeBegin < minBeforeDayEnd;
+        if(isAllDay()){
+            return getRemainingMinutesBeforeBegin() <= 0 && getRemainingMinutesBeforeEnd() >= 0;
+        }else{
+            //long remainingBeforeEndOfDay = 24*60 - getDateInDayMinutes(calendar);
+            return getRemainingMinutesBeforeBegin() < 8*60; // 8h max
+        }
+
     }
+
+    private static long getDateInDayMinutes(Calendar calendar){
+        return calendar.get(Calendar.HOUR_OF_DAY)*60 + calendar.get(Calendar.MINUTE);
+    }
+
 }

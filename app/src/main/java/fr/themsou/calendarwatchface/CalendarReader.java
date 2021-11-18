@@ -55,10 +55,9 @@ class CalendarReader {
         long beginDate = System.currentTimeMillis() - (calendar.get(Calendar.HOUR_OF_DAY)*60 + calendar.get(Calendar.MINUTE))*60*1000;
 
         Uri.Builder builder = WearableCalendarContract.Instances.CONTENT_URI.buildUpon();
-        ContentUris.appendId(builder, beginDate); // Définis la première date de recharche
+        ContentUris.appendId(builder, beginDate/* - (1000 * 60 * 60 * 24)*/); // Définis la première date de recharche
         ContentUris.appendId(builder, beginDate + (1000 * 60 * 60 * 24)); // Définis la seconde date de recharche
         final Cursor cursor = context.getContentResolver().query(builder.build(),null, null, null, null);
-
 
         while(cursor.moveToNext()){
 
@@ -77,13 +76,13 @@ class CalendarReader {
         return events;
     }
 
-    public static ArrayList<Event> getCurrentEvents(ArrayList<Event> events, int max){
+    public static ArrayList<Event> getCurrentEvents(Calendar calendar, ArrayList<Event> events, int max){
 
         long now = System.currentTimeMillis()/1000/60;
         ArrayList<Event> eventsFiltered = new ArrayList<>();
 
         for(Event event : events){
-            if(!event.isAllDay() && event.getBegin() <= now && event.getEnd() > now){
+            if(!event.isAllDay() && event.shouldBeShown(calendar) && event.getBegin() <= now && event.getEnd() > now){
                 if(eventsFiltered.size() < max){
                     eventsFiltered.add(event);
                     if(eventsFiltered.size() == max) break;
@@ -94,13 +93,13 @@ class CalendarReader {
 
     }
 
-    public static ArrayList<Event> getNextEvents(ArrayList<Event> events, int count){
+    public static ArrayList<Event> getNextEvents(Calendar calendar, ArrayList<Event> events, int count){
 
         long now = System.currentTimeMillis()/1000/60;
         ArrayList<Event> eventsFiltered = new ArrayList<>();
 
         for(Event event : events){
-            if(!event.isAllDay() && event.getBegin() > now && event.getRemainingMinutesBeforeBegin() < 60*12){
+            if(!event.isAllDay() && event.shouldBeShown(calendar) && event.getBegin() > now && event.getRemainingMinutesBeforeBegin() < 60*12){
                 if(eventsFiltered.size() < count){
                     eventsFiltered.add(event);
                     if(eventsFiltered.size() == count) break;
@@ -116,7 +115,7 @@ class CalendarReader {
         ArrayList<Event> eventsFiltered = new ArrayList<>();
 
         for(Event event : events){
-            if(event.isAllDay() && event.getBegin() > now && event.isToday(calendar)){
+            if(event.isAllDay() && event.shouldBeShown(calendar)){
                 if(eventsFiltered.size() < count){
                     eventsFiltered.add(event);
                     if(eventsFiltered.size() == count) break;

@@ -70,12 +70,12 @@ class Designer {
         paintDate.setColor(Color.WHITE);
         paintDate.setStrokeWidth(1);
 
-        paintHour.setTextSize(115);
+        paintHour.setTextSize(125);
         paintHour.setTextScaleX(0.7f);
         paintHour.setTypeface(engine.FONT_RUBIK);
         paintHour.setTextAlign(Paint.Align.CENTER);
         paintHour.setColor(Color.WHITE);
-        paintHour.setStrokeWidth(1);
+        paintHour.setStrokeWidth(2);
 
         paintHourDetails.setTextSize(40);
         paintHourDetails.setTypeface(engine.FONT_RUBIK);
@@ -90,7 +90,6 @@ class Designer {
         paintEventNameBig.setTypeface(engine.FONT_RUBIK);
         paintEventNameBig.setTextAlign(Paint.Align.CENTER);
         paintEventNameBig.setColor(Color.rgb(43, 152, 206));
-        paintEventNameBig.setUnderlineText(true);
 
         paintEventName.setTextSize(22);
         paintEventName.setTypeface(engine.FONT_RUBIK);
@@ -180,24 +179,24 @@ class Designer {
         dateEvents.tick(engine.calendar);
         canvas.drawRect(0, 0, engine.displayWidth, engine.displayHeight, paintBackground);
 
-        ArrayList<Event> currentEvents = CalendarReader.getCurrentEvents(events, 3);
-        ArrayList<Event> nextEvents = CalendarReader.getNextEvents(events, 3 - currentEvents.size());
-        ArrayList<Event> dayEvents = CalendarReader.getCurrentFullDayEvent(engine.calendar, events, 2);
-
-        canvas.drawText(getTime(), engine.displayCenterX, engine.displayCenterY, paintHour);
+        canvas.drawText(getTime(), engine.displayCenterX, engine.displayCenterY + 10, paintHour);
 
         if(!engine.isAmbient){
 
-            canvas.drawText(getFullDate(), engine.displayCenterX, 103, paintDate);
-            canvas.drawText(":" + getSeconds(), engine.displayCenterX + 156, engine.displayCenterY, paintHourDetails);
+            canvas.drawText(getFullDate(), engine.displayCenterX, 109, paintDate);
+            canvas.drawText(":" + getSeconds(), engine.displayCenterX + 156, engine.displayCenterY + 10, paintHourDetails);
 
-            int y = 41;
+            ArrayList<Event> dayEvents = CalendarReader.getCurrentFullDayEvent(engine.calendar, events, 2);
+            ArrayList<Event> currentEvents = CalendarReader.getCurrentEvents(engine.calendar, events, 3);
+            ArrayList<Event> nextEvents = CalendarReader.getNextEvents(engine.calendar, events, 3 - currentEvents.size());
+
+            int y = 53;
             for(Event event : dayEvents){
                 canvas.drawText("- " + event.getName() + " -", engine.displayCenterX, y, paintEventName);
                 y += 26;
             }
 
-            y = 241;
+            y = 244;
             for(Event event : currentEvents){
 
                 canvas.drawText("- " + event.getName() + " -", engine.displayCenterX, y, paintEventNameBig);
@@ -210,7 +209,7 @@ class Designer {
 
                 canvas.drawText("- " + event.getName() + " -", engine.displayCenterX, y, paintEventName);
                 y += 22;
-                canvas.drawText(getTime(event.getBeginDateInDayMinutes(engine.calendar)) + " - " + getTime(event.getBeginDateInDayMinutes(engine.calendar)) + " | " + getTime(event.getRemainingMinutesBeforeEnd(), false)
+                canvas.drawText(getTime(event.getBeginDateInDayMinutes(engine.calendar)) + " - " + getTime(event.getEndDateInDayMinutes(engine.calendar)) + " | " + getTime(event.getRemainingMinutesBeforeBegin(), false)
                         , engine.displayCenterX, y, paintEventDetails);
                 y += 28;
             }
@@ -218,30 +217,31 @@ class Designer {
         }else{
             canvas.drawText(getShortDate(), engine.displayCenterX, 103, paintDate);
 
-            int y = 41;
-            for(Event event : dayEvents){
-                canvas.drawText("- " + event.getName() + " -", engine.displayCenterX, y, paintEventName);
-                y += 26;
-            }
+            ArrayList<Event> currentEvents = CalendarReader.getCurrentEvents(engine.calendar, events, 2);
+            ArrayList<Event> nextEvents = CalendarReader.getNextEvents(engine.calendar, events, 2 - currentEvents.size());
 
-            y = 241;
+            int y = 265;
             for(Event event : currentEvents){
-                if(y == 241) canvas.drawText(getTime(event.getRemainingMinutesBeforeEnd(), false), engine.displayCenterX + 156, engine.displayCenterY, paintHourDetails);
+                if(y == 265){
+                    long remaining = event.getRemainingMinutesBeforeEnd();
+                    if(remaining <= 180) canvas.drawText(remaining+"", engine.displayCenterX + 156, engine.displayCenterY + 10, paintHourDetails);
+                    else canvas.drawText((remaining/60)+"h", engine.displayCenterX + 156, engine.displayCenterY + 10, paintHourDetails);
+                }
 
                 canvas.drawText("- " + event.getName() + " -", engine.displayCenterX, y, paintEventNameBig);
-                y += 22;
+                y += 24;
                 canvas.drawText(getTime(event.getBeginDateInDayMinutes(engine.calendar)) + " - " + getTime(event.getEndDateInDayMinutes(engine.calendar)) + " | " + getTime(event.getRemainingMinutesBeforeEnd(), false)
                         , engine.displayCenterX, y, paintEventDetails);
-                y += 35;
+                y += 33;
             }
             for(Event event : nextEvents){
                 if(y == 241) canvas.drawText(getTime(event.getRemainingMinutesBeforeBegin(), false), engine.displayCenterX + 156, engine.displayCenterY, paintHourDetails);
 
                 canvas.drawText("- " + event.getName() + " -", engine.displayCenterX, y, paintEventName);
-                y += 22;
-                canvas.drawText(getTime(event.getBeginDateInDayMinutes(engine.calendar)) + " - " + getTime(event.getBeginDateInDayMinutes(engine.calendar)) + " | " + getTime(event.getRemainingMinutesBeforeEnd(), false)
+                y += 24;
+                canvas.drawText(getTime(event.getBeginDateInDayMinutes(engine.calendar)) + " - " + getTime(event.getEndDateInDayMinutes(engine.calendar)) + " | " + getTime(event.getRemainingMinutesBeforeBegin(), false)
                         , engine.displayCenterX, y, paintEventDetails);
-                y += 28;
+                y += 33;
             }
 
         }
@@ -367,7 +367,7 @@ class Designer {
         return getTime(mn, true);
     }
     private String getTime(long mn, boolean hourZero){
-        int hour = (int) (mn) / 60;
+        int hour = (int) (mn) / 60 % 24;
         int minutes = (int) (mn) % 60;
 
         String stringHour = ((hour < 10 && hourZero) ? "0" : "") + hour;
